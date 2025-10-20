@@ -13,6 +13,7 @@ import DiaryIcon from "@/components/icons/DiaryIcon";
 import HeartIcon from "@/components/icons/HeartIcon";
 import NewChevronRight from "@/components/icons/NewChevronRight";
 import CommonModal from "@/components/ui/CommonModal";
+import Separator from "@/components/ui/Separator";
 import useUserStore, {
   useIsLoggedIn,
   useNickname,
@@ -227,7 +228,7 @@ export default function MyScreen() {
           </View>
 
           <Pressable
-            className="mx-4 mt-4 flex h-12 items-center justify-center rounded-lg bg-gray-100"
+            className="mx-4 mt-4 flex h-12 items-center justify-center rounded-lg bg-gray-100 active:bg-gray-200"
             onPress={handleEditProfile}
           >
             <Text className="text-base font-semibold text-[#424242]">
@@ -238,7 +239,7 @@ export default function MyScreen() {
           <View className="mx-4 my-4 flex flex-row items-center justify-center rounded-lg bg-[#F2F3F6]">
             <Pressable
               onPress={handlePlan}
-              className="m-2 flex h-[70px] w-[105px] items-center justify-center"
+              className="m-2 flex h-[70px] w-[105px] items-center justify-center rounded-lg active:bg-gray-200"
             >
               <DiaryIcon />
               <Text className="mt-1.5 text-sm text-[#424242]">나의 일정</Text>
@@ -249,7 +250,7 @@ export default function MyScreen() {
             />
             <Pressable
               onPress={handleLike}
-              className="m-2 flex h-[70px] w-[105px] items-center justify-center"
+              className="m-2 flex h-[70px] w-[105px] items-center justify-center rounded-lg active:bg-gray-200"
             >
               <HeartIcon />
               <Text className="mt-1.5 text-sm text-[#424242]">관심목록</Text>
@@ -260,7 +261,7 @@ export default function MyScreen() {
             />
             <Pressable
               onPress={handleSurvey}
-              className="m-2 flex h-[70px] w-[105px] items-center justify-center"
+              className="m-2 flex h-[70px] w-[105px] items-center justify-center rounded-lg active:bg-gray-200"
             >
               <CalendarEditIcon />
               <Text className="mt-1.5 text-sm text-[#424242]">
@@ -298,27 +299,31 @@ export default function MyScreen() {
         className="my-2 h-[12px] w-full bg-[#F2F2F7]"
       />
 
-      <View className="w-full px-4">
+      <View className="w-full gap-y-1 px-4">
         <Pressable
           onPress={() => router.push("/terms")}
-          className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC] px-2"
+          className="flex h-14 w-full flex-row items-center justify-between rounded-lg px-2 active:bg-gray-100"
         >
           <Text className="text-lg">이용약관</Text>
           <NewChevronRight />
         </Pressable>
+        <Separator />
         {isLoggedIn && (
-          <Pressable
-            onPress={handleAuthAction}
-            className="flex h-16 w-full flex-row items-center justify-between border-b-[1px] border-[#E5E5EC] px-2"
-          >
-            <Text className="text-lg">로그아웃</Text>
-            <NewChevronRight />
-          </Pressable>
+          <>
+            <Pressable
+              onPress={handleAuthAction}
+              className="flex h-14 w-full flex-row items-center justify-between rounded-lg px-2 active:bg-gray-100"
+            >
+              <Text className="text-lg">로그아웃</Text>
+              <NewChevronRight />
+            </Pressable>
+            <Separator />
+          </>
         )}
         {isLoggedIn && (
           <Pressable
             onPress={() => router.push("/my/withdrawal")}
-            className="flex h-16 w-full flex-row items-center justify-between px-2"
+            className="flex h-14 w-full flex-row items-center justify-between rounded-lg px-2 active:bg-gray-100"
           >
             <Text className="text-lg">회원탈퇴</Text>
             <NewChevronRight />

@@ -18,6 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
 
+import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Separator from "@/components/ui/Separator";
 import { WithdrawUrl } from "@/constants/ApiUrls";
@@ -29,6 +30,7 @@ export default function Withdrawal() {
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [otherReason, setOtherReason] = useState<string>("");
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
   const isOpen = useSharedValue(0);
 
@@ -64,28 +66,40 @@ export default function Withdrawal() {
     }
   };
 
-  const handleWithdraw = async () => {
+  // 제출 버튼 클릭 시 확인 모달 표시
+  const handleSubmitPress = () => {
     if (checkSubmit()) {
-      try {
-        await authApi.delete(WithdrawUrl);
-
-        // 토큰 및 사용자 정보 삭제
-        await SecureStore.deleteItemAsync("accessToken");
-        await SecureStore.deleteItemAsync("refreshToken");
-        await SecureStore.deleteItemAsync("nickname");
-        await SecureStore.deleteItemAsync("profileImage");
-        await SecureStore.deleteItemAsync("userRegions");
-
-        // Store 초기화
-        const { clearUserInfo } = useUserStore.getState().action;
-        clearUserInfo();
-
-        // 로그인 화면으로 이동
-        router.replace("/");
-      } catch (error) {
-        console.error("회원탈퇴 실패:", error);
-      }
+      setShowConfirmModal(true);
     }
+  };
+
+  // 회원탈퇴 확인 후 실행
+  const handleWithdraw = async () => {
+    setShowConfirmModal(false);
+    try {
+      await authApi.delete(WithdrawUrl);
+
+      // 토큰 및 사용자 정보 삭제
+      await SecureStore.deleteItemAsync("accessToken");
+      await SecureStore.deleteItemAsync("refreshToken");
+      await SecureStore.deleteItemAsync("nickname");
+      await SecureStore.deleteItemAsync("profileImage");
+      await SecureStore.deleteItemAsync("userRegions");
+
+      // Store 초기화
+      const { clearUserInfo } = useUserStore.getState().action;
+      clearUserInfo();
+
+      // 로그인 화면으로 이동
+      router.replace("/");
+    } catch (error) {
+      console.error("회원탈퇴 실패:", error);
+    }
+  };
+
+  // 회원탈퇴 취소
+  const handleCancelWithdraw = () => {
+    setShowConfirmModal(false);
   };
 
   return (
@@ -172,9 +186,12 @@ export default function Withdrawal() {
         <View className="pb-8">
           <Pressable
             className={`flex h-16 w-full items-center justify-center rounded-lg ${
-              checkSubmit() ? "bg-[#6C4DFF]" : "bg-[#E0E0E0]"
+              checkSubmit()
+                ? "bg-[#EF4444] active:bg-[#DC2626]"
+                : "bg-[#E0E0E0]"
             }`}
-            onPress={handleWithdraw}
+            onPress={handleSubmitPress}
+            disabled={!checkSubmit()}
           >
             <Text className="text-center text-xl font-semibold text-white">
               제출
@@ -182,6 +199,19 @@ export default function Withdrawal() {
           </Pressable>
         </View>
       </View>
+
+      {/* 회원탈퇴 확인 모달 */}
+      <CommonModal
+        visible={showConfirmModal}
+        onClose={handleCancelWithdraw}
+        mainTitle="정말 탈퇴하시겠어요?"
+        subTitle="탈퇴 시 모든 데이터가 삭제되며 복구할 수 없어요."
+        cancelText="취소"
+        confirmText="탈퇴"
+        onCancel={handleCancelWithdraw}
+        onConfirm={handleWithdraw}
+        confirmButtonColor="danger"
+      />
     </SafeAreaView>
   );
 }
