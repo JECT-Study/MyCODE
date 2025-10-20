@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -115,6 +116,13 @@ export default function Plan() {
       }
     },
     [],
+  );
+
+  // 상태바 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
   );
 
   // 초기 데이터 로딩

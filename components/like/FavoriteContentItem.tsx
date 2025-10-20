@@ -37,10 +37,11 @@ export default function FavoriteContentItem({
   onLikeChange,
   showSeparator = true,
 }: FavoriteContentItemProps) {
-  const router = useRouter();
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  const router = useRouter();
 
   const hasImage = info.img_url && info.img_url.trim() !== "";
   const imageSource = hasImage

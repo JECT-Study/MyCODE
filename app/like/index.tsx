@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { AxiosError } from "axios";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -107,6 +108,13 @@ export default function Like() {
       setRefresh(false);
     }
   }, [fetchLikes]);
+
+  // 상태바 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
+  );
 
   // 카테고리 변경 시 데이터 새로고침
   useEffect(() => {
