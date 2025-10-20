@@ -7,13 +7,13 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import ActionBottomSheet from "@/components/ui/ActionBottomSheet";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Divider from "@/components/ui/Divider";
+import EmptyState from "@/components/ui/EmptyState";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
@@ -269,7 +269,10 @@ export default function Plan() {
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : (
-                <ScheduleEmptyState />
+                <EmptyState
+                  title="예정된 일정이 없어요."
+                  subtitle="다른 날을 조회해보세요!"
+                />
               )
             }
             ListHeaderComponent={

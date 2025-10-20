@@ -7,10 +7,10 @@ import { setStatusBarStyle } from "expo-status-bar";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 
-import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import Divider from "@/components/ui/Divider";
+import EmptyState from "@/components/ui/EmptyState";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
@@ -215,7 +215,10 @@ export default function ScheduleScreen() {
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : (
-                <ScheduleEmptyState />
+                <EmptyState
+                  title="예정된 일정이 없어요."
+                  subtitle="다른 날을 조회해보세요!"
+                />
               )
             }
             ListHeaderComponent={
