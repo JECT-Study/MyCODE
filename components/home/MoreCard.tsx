@@ -68,11 +68,12 @@ export default function MoreCard({ item }: { item: CategoryContentItem }) {
         <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
           {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
         </Text>
-        <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
+        {/* response에 주소가 없어서 임시 주석처리 */}
+        {/* <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">
           <Text className="text-sm font-medium text-[#707070]">
             경기 남양주시
           </Text>
-        </View>
+        </View> */}
       </View>
     </Pressable>
   );
