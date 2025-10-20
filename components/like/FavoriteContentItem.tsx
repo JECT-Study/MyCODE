@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Image, Pressable, Text, View } from "react-native";
 
@@ -36,6 +37,7 @@ export default function FavoriteContentItem({
   onLikeChange,
   showSeparator = true,
 }: FavoriteContentItemProps) {
+  const router = useRouter();
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -68,8 +70,16 @@ export default function FavoriteContentItem({
     }
   }, [info]);
 
+  // 상세 페이지로 이동
+  const handlePress = () => {
+    router.push(`/detail/${info.contentId}`);
+  };
+
   // 좋아요 토글 함수
-  const handleLikeToggle = async () => {
+  const handleLikeToggle = async (e: any) => {
+    // 이벤트 전파 중지 (아이템 클릭 이벤트가 발생하지 않도록)
+    e.stopPropagation();
+
     if (!info.contentId || isLikeLoading || !isLoggedIn) return;
 
     setIsLikeLoading(true);
@@ -110,7 +120,11 @@ export default function FavoriteContentItem({
 
   return (
     <>
-      <View className="flex-row">
+      <Pressable
+        className="flex-row"
+        onPress={handlePress}
+        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+      >
         <Image
           source={imageSource}
           className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
@@ -154,7 +168,7 @@ export default function FavoriteContentItem({
             )}
           </Pressable>
         </View>
-      </View>
+      </Pressable>
       {showSeparator && (
         <View className="py-5">
           <Separator />

@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { Tabs, usePathname } from "expo-router";
 import { Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,6 +16,7 @@ const TabColors = {
 
 export default function TabLayout() {
   const pathname = usePathname();
+  const lastTabRef = useRef<string>("index"); // 마지막으로 방문한 탭을 추적
 
   // 탭 활성화 상태를 판별하는 함수
   const isTabActive = (screen: { activePage?: string; name: string }) => {
@@ -29,10 +32,33 @@ export default function TabLayout() {
     }
   };
 
+  // 탭 페이지일 때 마지막 탭 업데이트
+  useEffect(() => {
+    const isTabPage = TAB_SCREENS.some(
+      (screen) => pathname === `/${screen.name}` || pathname === ROUTES.HOME,
+    );
+
+    if (isTabPage) {
+      const currentTab = TAB_SCREENS.find(
+        (screen) => pathname === `/${screen.name}` || pathname === ROUTES.HOME,
+      );
+      if (currentTab) {
+        lastTabRef.current = currentTab.name;
+      }
+    }
+  }, [pathname]);
+
   const isHomePage = pathname === ROUTES.HOME;
   const isDetailPage = pathname?.startsWith("/detail/");
   const isSearchResultsPage = pathname?.startsWith("/search-results");
+  const isSearchKeywordsPage = pathname?.startsWith("/search-keywords");
   const isSurveyPage = pathname?.startsWith("/survey");
+
+  // 홈 탭에서 온 경우에만 보라색 배경 적용
+  const isDetailFromHome = isDetailPage && lastTabRef.current === "index";
+  const isSearchKeywordsFromHome =
+    isSearchKeywordsPage && lastTabRef.current === "index";
+  const isSurveyFromHome = isSurveyPage && lastTabRef.current === "index";
 
   return (
     <>
@@ -40,7 +66,11 @@ export default function TabLayout() {
         className="flex-1"
         style={{
           backgroundColor:
-            isHomePage || isDetailPage || isSearchResultsPage || isSurveyPage
+            isHomePage ||
+            isDetailFromHome ||
+            isSearchResultsPage ||
+            isSearchKeywordsFromHome ||
+            isSurveyFromHome
               ? "#816BFF"
               : "#FFFFFF",
         }}
