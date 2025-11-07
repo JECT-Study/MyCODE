@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
+
+import { formatShortDate } from "@/utils/dateUtils";
 
 interface CategoryContentItem {
   contentId: number;
@@ -19,8 +20,6 @@ export default function MoreCard({ item }: { item: CategoryContentItem }) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
   const hasImage = item.image && item.image.trim() !== "";
   const imageSource = hasImage
@@ -66,7 +65,7 @@ export default function MoreCard({ item }: { item: CategoryContentItem }) {
           {item.title}
         </Text>
         <Text className="mb-2 text-sm font-normal text-[#BDBDBD]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
+          {formatShortDate(item.startDate)} ~ {formatShortDate(item.endDate)}
         </Text>
         {/* response에 주소가 없어서 임시 주석처리 */}
         {/* <View className="mb-2 flex h-7 justify-center self-start rounded-full border border-[#E0E0E0] bg-white px-3">

@@ -15,29 +15,10 @@ import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
 import { ScheduleApiResponse } from "@/types/schedule";
+import { formatDateWithDay } from "@/utils/dateUtils";
 
 // 페이지네이션 상수
 const SCHEDULE_LIMIT = 8;
-
-const formatSelectedDateHeader = (date: string) => {
-  const dayOfWeek = [
-    "일요일",
-    "월요일",
-    "화요일",
-    "수요일",
-    "목요일",
-    "금요일",
-    "토요일",
-  ];
-
-  const selectedDay = dayjs(date);
-  const today = dayjs();
-  const isToday = selectedDay.isSame(today, "day");
-
-  const dayName = dayOfWeek[selectedDay.day()];
-  const dateText = `${selectedDay.date()}일 ${dayName}`;
-  return isToday ? `${dateText} (오늘)` : dateText;
-};
 
 export default function ScheduleScreen() {
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
@@ -225,7 +206,7 @@ export default function ScheduleScreen() {
               schedules.length > 0 ? (
                 <View className="mb-4">
                   <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                    {formatSelectedDateHeader(selectedDate)}
+                    {formatDateWithDay(selectedDate)}
                   </Text>
                 </View>
               ) : null

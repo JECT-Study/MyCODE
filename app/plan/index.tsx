@@ -19,24 +19,9 @@ import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
 import { ScheduleApiResponse } from "@/types/schedule";
+import { formatRelativeDate } from "@/utils/dateUtils";
 
 const SCHEDULE_LIMIT = 10;
-
-// 선택된 날짜 헤더 포맷팅 함수
-const formatSelectedDateHeader = (dateString: string) => {
-  const date = dayjs(dateString);
-  const today = dayjs();
-
-  if (date.isSame(today, "day")) {
-    return `오늘 ${date.format("M월 D일")}`;
-  } else if (date.isSame(today.add(1, "day"), "day")) {
-    return `내일 ${date.format("M월 D일")}`;
-  } else if (date.isSame(today.subtract(1, "day"), "day")) {
-    return `어제 ${date.format("M월 D일")}`;
-  } else {
-    return date.format("M월 D일");
-  }
-};
 
 export default function Plan() {
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
@@ -279,7 +264,7 @@ export default function Plan() {
               schedules.length > 0 ? (
                 <View className="mb-4">
                   <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                    {formatSelectedDateHeader(selectedDate)}
+                    {formatRelativeDate(selectedDate)}
                   </Text>
                 </View>
               ) : null

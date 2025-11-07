@@ -1,10 +1,10 @@
 import React from "react";
 
-import dayjs from "dayjs";
 import { Image, Pressable, Text, View } from "react-native";
 
 import DotsIcon from "@/components/icons/DotsIcon";
 import { ScheduleItemType } from "@/constants/ScheduleData";
+import { formatDateRange } from "@/utils/dateUtils";
 
 interface ScheduleItemProps {
   item: ScheduleItemType;
@@ -12,17 +12,6 @@ interface ScheduleItemProps {
   onMenuPress?: (contentId: number) => void;
   showMenuButton?: boolean;
 }
-
-const formatDateRange = (startDate: string, endDate: string) => {
-  const start = dayjs(startDate);
-  const end = dayjs(endDate);
-
-  if (start.year() === end.year()) {
-    return `${start.format("YYYY.MM.DD")} - ${end.format("MM.DD")}`;
-  } else {
-    return `${start.format("YYYY.MM.DD")} - ${end.format("YYYY.MM.DD")}`;
-  }
-};
 
 export default function ScheduleItem({
   item,

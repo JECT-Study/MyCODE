@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { formatAddress } from "@/utils/addressUtils";
+import { formatShortDate } from "@/utils/dateUtils";
 
 interface CustomContentItem {
   contentId: number;
@@ -23,8 +23,6 @@ export default function Card({ item }: { item: CustomContentItem }) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
 
   const hasImage = item.image && item.image.trim() !== "";
   const imageSource = hasImage
@@ -73,7 +71,7 @@ export default function Card({ item }: { item: CustomContentItem }) {
           {formatAddress(item.address)}
         </Text>
         <Text className="text-sm text-[#707070]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
+          {formatShortDate(item.startDate)} ~ {formatShortDate(item.endDate)}
         </Text>
       </View>
     </Pressable>
