@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
+import ContentImage from "@/components/ui/ContentImage";
 import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -42,11 +43,6 @@ export default function FavoriteContentItem({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const router = useRouter();
-
-  const hasImage = info.img_url && info.img_url.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: info.img_url }
-    : require("../../assets/images/content_placeholder.png");
 
   // 토큰 확인을 통한 로그인 상태 체크
   useEffect(() => {
@@ -126,10 +122,10 @@ export default function FavoriteContentItem({
         onPress={handlePress}
         style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
       >
-        <Image
-          source={imageSource}
-          className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
-          resizeMode="cover"
+        <ContentImage
+          imageUrl={info.img_url}
+          className="h-[92px] w-[92px]"
+          rounded="rounded-[4px]"
         />
         <View className="ml-3.5 mr-2 flex-1">
           <Text

@@ -1,8 +1,9 @@
 import React from "react";
 
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import DotsIcon from "@/components/icons/DotsIcon";
+import ContentImage from "@/components/ui/ContentImage";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { formatDateRange } from "@/utils/dateUtils";
 
@@ -19,21 +20,16 @@ export default function ScheduleItem({
   onMenuPress,
   showMenuButton = false,
 }: ScheduleItemProps) {
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
   return (
     <Pressable
       onPress={() => onPress?.(item.contentId)}
       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
     >
       <View className="flex-row gap-x-[18px]">
-        <Image
-          source={imageSource}
-          className="h-[136px] w-[104px] rounded-lg"
-          resizeMode="cover"
+        <ContentImage
+          imageUrl={item.image}
+          className="h-[136px] w-[104px]"
+          rounded="rounded-lg"
         />
         <View className="flex-1 py-2.5">
           <View className="flex-row items-start justify-between">

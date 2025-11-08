@@ -1,8 +1,7 @@
-import { useState } from "react";
-
 import { useRouter } from "expo-router";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
+import ContentImage from "@/components/ui/ContentImage";
 import { formatShortDate } from "@/utils/dateUtils";
 
 interface CategoryContentItem {
@@ -17,46 +16,16 @@ interface CategoryContentItem {
 
 export default function MoreCard({ item }: { item: CategoryContentItem }) {
   const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
-      <View className="relative h-[92px] w-full overflow-hidden rounded-[14px]">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-[14px]"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-[14px] ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-[14px]"
-            resizeMode="cover"
-          />
-        )}
-      </View>
+      <ContentImage
+        imageUrl={item.image}
+        className="h-[92px] w-full"
+        rounded="rounded-[14px]"
+      />
       <View className="mt-2">
         <Text
           className="text-lg font-semibold leading-6 text-[#424242]"
