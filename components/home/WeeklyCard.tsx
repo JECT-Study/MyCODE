@@ -1,10 +1,9 @@
-import { useState } from "react";
-
-import dayjs from "dayjs";
 import { useRouter } from "expo-router";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
+import ContentImage from "@/components/ui/ContentImage";
 import { formatAddress } from "@/utils/addressUtils";
+import { formatShortDate } from "@/utils/dateUtils";
 
 interface WeeklyContentItem {
   contentId: number;
@@ -17,48 +16,16 @@ interface WeeklyContentItem {
 
 export default function WeeklyCard({ item }: { item: WeeklyContentItem }) {
   const router = useRouter();
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handlePress = () => router.push(`/detail/${item.contentId}`);
 
-  const formatDate = (date: string) => dayjs(date).format("YY.MM.DD");
-
-  const hasImage = item.image && item.image.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: item.image }
-    : require("../../assets/images/content_placeholder.png");
-
   return (
     <Pressable className="flex-row" onPress={handlePress}>
-      <View className="relative h-[90px] w-[120px] overflow-hidden rounded-lg">
-        {hasImage ? (
-          <>
-            {/* Placeholder 이미지 - 항상 표시 */}
-            <Image
-              source={require("../../assets/images/content_placeholder.png")}
-              className="absolute inset-0 h-full w-full rounded-lg"
-              resizeMode="cover"
-            />
-            {/* API 이미지 - 로딩 완료 시 표시 */}
-            <Image
-              source={imageSource}
-              className={`absolute inset-0 h-full w-full rounded-lg ${
-                imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              resizeMode="cover"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(false)}
-            />
-          </>
-        ) : (
-          /* 이미지가 없는 경우 placeholder만 표시 */
-          <Image
-            source={imageSource}
-            className="absolute inset-0 h-full w-full rounded-lg"
-            resizeMode="cover"
-          />
-        )}
-      </View>
+      <ContentImage
+        imageUrl={item.image}
+        className="h-[90px] w-[120px]"
+        rounded="rounded-lg"
+      />
       <View className="ml-3.5 flex-1">
         <Text
           className="mb-1 text-lg font-semibold leading-6 text-[#424242]"
@@ -70,7 +37,7 @@ export default function WeeklyCard({ item }: { item: WeeklyContentItem }) {
           {formatAddress(item.address)}
         </Text>
         <Text className="text-sm font-normal text-[#707070]">
-          {formatDate(item.startDate)} ~ {formatDate(item.endDate)}
+          {formatShortDate(item.startDate)} ~ {formatShortDate(item.endDate)}
         </Text>
       </View>
     </Pressable>

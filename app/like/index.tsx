@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { AxiosError } from "axios";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +15,7 @@ import {
 
 import FavoriteContentItem from "@/components/like/FavoriteContentItem";
 import CustomHeader from "@/components/ui/CustomHeader";
+import EmptyState from "@/components/ui/EmptyState";
 import Toast from "@/components/ui/Toast";
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { categoryUnion, filterData } from "@/constants/Filter";
@@ -107,6 +109,13 @@ export default function Like() {
       setRefresh(false);
     }
   }, [fetchLikes]);
+
+  // 상태바 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
+  );
 
   // 카테고리 변경 시 데이터 새로고침
   useEffect(() => {
@@ -216,11 +225,10 @@ export default function Like() {
               <ActivityIndicator size="large" color="#6C4DFF" />
             </View>
           ) : (
-            <View className="flex-1 items-center justify-center">
-              <Text className="text-base text-gray-500">
-                아직 찜한 콘텐츠가 없어요.
-              </Text>
-            </View>
+            <EmptyState
+              title="아직 찜한 콘텐츠가 없어요."
+              subtitle="마음에 드는 콘텐츠를 찜해보세요!"
+            />
           )
         }
         ListFooterComponent={

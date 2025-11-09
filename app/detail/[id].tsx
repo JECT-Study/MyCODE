@@ -541,7 +541,7 @@ export default function DetailScreen() {
             {/* 중앙 제목 텍스트 */}
             {showHeaderBackground && (
               <Text
-                className="text-lg font-semibold text-[#212121]"
+                className="text-xl font-semibold text-[#212121]"
                 numberOfLines={1}
                 style={{ maxWidth: "60%" }}
               >

@@ -13,6 +13,7 @@ interface CommonModalProps {
   onCancel?: () => void;
   onConfirm?: () => void;
   showCancelButton?: boolean;
+  confirmButtonColor?: "primary" | "danger";
 }
 
 export default function CommonModal({
@@ -26,6 +27,7 @@ export default function CommonModal({
   onCancel,
   onConfirm,
   showCancelButton = true,
+  confirmButtonColor = "primary",
 }: CommonModalProps) {
   const handleCancel = () => {
     onCancel?.();
@@ -75,7 +77,11 @@ export default function CommonModal({
             )}
 
             <Pressable
-              className={`${showCancelButton ? "flex-1" : "w-full"} h-14 items-center justify-center rounded-xl bg-[#6C4DFF] active:bg-[#5638E6]`}
+              className={`${showCancelButton ? "flex-1" : "w-full"} h-14 items-center justify-center rounded-xl ${
+                confirmButtonColor === "danger"
+                  ? "bg-[#EF4444] active:bg-[#DC2626]"
+                  : "bg-[#6C4DFF] active:bg-[#5638E6]"
+              }`}
               onPress={handleConfirm}
             >
               <Text className="text-center text-lg font-semibold text-white">

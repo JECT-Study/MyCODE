@@ -1,41 +1,27 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
 import ScheduleItem from "@/components/schedule/ScheduleItem";
 import ActionBottomSheet from "@/components/ui/ActionBottomSheet";
 import CommonCalendar from "@/components/ui/CommonCalendar";
 import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Divider from "@/components/ui/Divider";
+import EmptyState from "@/components/ui/EmptyState";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
 import { ScheduleApiResponse } from "@/types/schedule";
+import { formatRelativeDate } from "@/utils/dateUtils";
 
 const SCHEDULE_LIMIT = 10;
-
-// 선택된 날짜 헤더 포맷팅 함수
-const formatSelectedDateHeader = (dateString: string) => {
-  const date = dayjs(dateString);
-  const today = dayjs();
-
-  if (date.isSame(today, "day")) {
-    return `오늘 ${date.format("M월 D일")}`;
-  } else if (date.isSame(today.add(1, "day"), "day")) {
-    return `내일 ${date.format("M월 D일")}`;
-  } else if (date.isSame(today.subtract(1, "day"), "day")) {
-    return `어제 ${date.format("M월 D일")}`;
-  } else {
-    return date.format("M월 D일");
-  }
-};
 
 export default function Plan() {
   const [schedules, setSchedules] = useState<ScheduleItemType[]>([]);
@@ -115,6 +101,13 @@ export default function Plan() {
       }
     },
     [],
+  );
+
+  // 상태바 스타일 설정
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("dark");
+    }, []),
   );
 
   // 초기 데이터 로딩
@@ -261,14 +254,17 @@ export default function Plan() {
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
               ) : (
-                <ScheduleEmptyState />
+                <EmptyState
+                  title="예정된 일정이 없어요."
+                  subtitle="다른 날을 조회해보세요!"
+                />
               )
             }
             ListHeaderComponent={
               schedules.length > 0 ? (
                 <View className="mb-4">
                   <Text className="text-[13px] font-normal text-[#9E9E9E]">
-                    {formatSelectedDateHeader(selectedDate)}
+                    {formatRelativeDate(selectedDate)}
                   </Text>
                 </View>
               ) : null

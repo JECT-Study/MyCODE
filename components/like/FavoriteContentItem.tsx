@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 
+import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { Image, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
+import ContentImage from "@/components/ui/ContentImage";
 import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
@@ -40,10 +42,7 @@ export default function FavoriteContentItem({
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const hasImage = info.img_url && info.img_url.trim() !== "";
-  const imageSource = hasImage
-    ? { uri: info.img_url }
-    : require("../../assets/images/content_placeholder.png");
+  const router = useRouter();
 
   // 토큰 확인을 통한 로그인 상태 체크
   useEffect(() => {
@@ -68,8 +67,16 @@ export default function FavoriteContentItem({
     }
   }, [info]);
 
+  // 상세 페이지로 이동
+  const handlePress = () => {
+    router.push(`/detail/${info.contentId}`);
+  };
+
   // 좋아요 토글 함수
-  const handleLikeToggle = async () => {
+  const handleLikeToggle = async (e: any) => {
+    // 이벤트 전파 중지 (아이템 클릭 이벤트가 발생하지 않도록)
+    e.stopPropagation();
+
     if (!info.contentId || isLikeLoading || !isLoggedIn) return;
 
     setIsLikeLoading(true);
@@ -110,11 +117,15 @@ export default function FavoriteContentItem({
 
   return (
     <>
-      <View className="flex-row">
-        <Image
-          source={imageSource}
-          className="h-[92px] w-[92px] rounded-[4px] bg-gray-200"
-          resizeMode="cover"
+      <Pressable
+        className="flex-row"
+        onPress={handlePress}
+        style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+      >
+        <ContentImage
+          imageUrl={info.img_url}
+          className="h-[92px] w-[92px]"
+          rounded="rounded-[4px]"
         />
         <View className="ml-3.5 mr-2 flex-1">
           <Text
@@ -154,7 +165,7 @@ export default function FavoriteContentItem({
             )}
           </Pressable>
         </View>
-      </View>
+      </Pressable>
       {showSeparator && (
         <View className="py-5">
           <Separator />

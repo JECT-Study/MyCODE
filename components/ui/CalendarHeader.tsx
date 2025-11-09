@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { Pressable, Text, View } from "react-native";
 
 import CalendarArrow from "@/components/icons/CalendarArrow";
+import { formatYearMonth } from "@/utils/dateUtils";
 
 interface CalendarHeaderProps {
   selectedDate: string;
@@ -13,14 +14,6 @@ interface CalendarHeaderProps {
   /** 최대 날짜 (YYYY-MM-DD 형식) */
   maxDate?: string;
 }
-
-// 년월 포맷팅 함수
-const formatYearMonth = (dateString: string) => {
-  const date = dayjs(dateString);
-  const year = date.year();
-  const month = String(date.month() + 1).padStart(2, "0");
-  return { year, month };
-};
 
 export default function CalendarHeader({
   selectedDate,
