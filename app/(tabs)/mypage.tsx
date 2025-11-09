@@ -50,6 +50,7 @@ export default function MyScreen() {
       await SecureStore.deleteItemAsync("refreshToken");
       await SecureStore.deleteItemAsync("nickname");
       await SecureStore.deleteItemAsync("profileImage");
+      await SecureStore.deleteItemAsync("userRegions");
 
       const { clearUserInfo } = useUserStore.getState().action;
       clearUserInfo();
