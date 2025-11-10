@@ -83,7 +83,16 @@ authApi.interceptors.response.use(
     const httpStatus = error.response?.status;
 
     // 토큰 만료 처리 - 갱신 시도
-    if (errorCode === ERROR_CODES.TOKEN_EXPIRED && !originalRequest._retry) {
+    // 1. 4011(TOKEN_EXPIRED) 에러
+    // 2. 401 Unauthorized 에러 (백엔드가 토큰 만료를 401로 반환하는 경우)
+    // 3. 500 에러 중 인증 관련 에러
+    const shouldRefreshToken =
+      (errorCode === ERROR_CODES.TOKEN_EXPIRED ||
+        httpStatus === 401 ||
+        (httpStatus === 500 && errorCode === 4000)) &&
+      !originalRequest._retry;
+
+    if (shouldRefreshToken) {
       // 이미 토큰 갱신 중이면 큐에 추가하고 대기
       if (isRefreshing) {
         try {
@@ -102,8 +111,14 @@ authApi.interceptors.response.use(
 
       try {
         console.log("토큰 갱신:", {
-          reason: "토큰 만료 (4011)",
-          backendCode: ERROR_CODES.TOKEN_EXPIRED,
+          reason:
+            errorCode === ERROR_CODES.TOKEN_EXPIRED
+              ? "토큰 만료 (4011)"
+              : httpStatus === 401
+                ? "인증 실패 (401)"
+                : "서버 에러로 인한 토큰 갱신 시도",
+          httpStatus,
+          backendCode: errorCode,
           action: "리프레시 토큰으로 갱신 시도",
         });
 
@@ -113,9 +128,30 @@ authApi.interceptors.response.use(
           throw new Error("리프레시 토큰이 없습니다.");
         }
 
-        // 리프레시 토큰으로 새 액세스 토큰 요청
-        const refreshResponse = await publicApi.post("/auth/token/refresh", {
-          refreshToken,
+        console.log("리프레시 토큰으로 갱신 요청 중...", {
+          baseURL: publicApi.defaults.baseURL,
+          endpoint: "/auth/token/refresh",
+          fullURL: `${publicApi.defaults.baseURL}/auth/token/refresh`,
+          method: "POST",
+          hasRefreshToken: !!refreshToken,
+          refreshTokenLength: refreshToken?.length,
+        });
+
+        // 리프레시 토큰으로 새 액세스 토큰 요청 (헤더로 전달)
+        const refreshResponse = await publicApi.post(
+          "/auth/token/refresh",
+          {},
+          {
+            headers: {
+              RefreshToken: refreshToken,
+            },
+          },
+        );
+
+        console.log("토큰 갱신 응답 성공:", {
+          status: refreshResponse.status,
+          hasAccessToken: !!refreshResponse.data.result?.accessToken,
+          hasRefreshToken: !!refreshResponse.data.result?.refreshToken,
         });
 
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
@@ -151,6 +187,8 @@ authApi.interceptors.response.use(
           httpStatus: refreshHttpStatus,
           backendCode: refreshErrorCode,
           message: (refreshError as any).response?.data?.message,
+          fullResponse: (refreshError as any).response?.data,
+          errorType: (refreshError as any).constructor?.name,
         });
 
         // 대기 중인 요청들에 에러 전달
