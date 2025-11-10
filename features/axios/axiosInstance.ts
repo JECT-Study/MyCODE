@@ -3,17 +3,9 @@ import Constants from "expo-constants";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
-const baseURL = Constants.expoConfig?.extra?.BACKEND_URL ?? "";
+import { RESPONSE_CODES } from "@/features/axios/responseCodes";
 
-const ERROR_CODES = {
-  // 인증 관련
-  TOKEN_LOGGED_OUT: 2401, // 로그아웃된 토큰
-  INACTIVE_USER: 2404, // 탈퇴한 사용자
-  INVALID_TOKEN: 4004, // 유효하지 않은 토큰
-  UNAUTHORIZED: 4010, // 인증 필요
-  TOKEN_EXPIRED: 4011, // 토큰 만료
-  FORBIDDEN: 4030, // 접근 권한 없음
-} as const;
+const baseURL = Constants.expoConfig?.extra?.BACKEND_URL ?? "";
 
 export const publicApi = axios.create({
   baseURL,
@@ -87,7 +79,7 @@ authApi.interceptors.response.use(
     // 2. 401 Unauthorized 에러 (백엔드가 토큰 만료를 401로 반환하는 경우)
     // 3. 500 에러 중 인증 관련 에러
     const shouldRefreshToken =
-      (errorCode === ERROR_CODES.TOKEN_EXPIRED ||
+      (errorCode === RESPONSE_CODES.TOKEN_EXPIRED ||
         httpStatus === 401 ||
         (httpStatus === 500 && errorCode === 4000)) &&
       !originalRequest._retry;
@@ -112,7 +104,7 @@ authApi.interceptors.response.use(
       try {
         console.log("토큰 갱신:", {
           reason:
-            errorCode === ERROR_CODES.TOKEN_EXPIRED
+            errorCode === RESPONSE_CODES.TOKEN_EXPIRED
               ? "토큰 만료 (4011)"
               : httpStatus === 401
                 ? "인증 실패 (401)"
@@ -196,10 +188,10 @@ authApi.interceptors.response.use(
 
         // 인증 관련 에러 시 로그아웃 처리
         const authErrorCodes = [
-          ERROR_CODES.TOKEN_LOGGED_OUT,
-          ERROR_CODES.INVALID_TOKEN,
-          ERROR_CODES.UNAUTHORIZED,
-          ERROR_CODES.TOKEN_EXPIRED,
+          RESPONSE_CODES.TOKEN_LOGGED_OUT,
+          RESPONSE_CODES.INVALID_TOKEN,
+          RESPONSE_CODES.UNAUTHORIZED,
+          RESPONSE_CODES.TOKEN_EXPIRED,
         ];
 
         if (authErrorCodes.includes(refreshErrorCode)) {
@@ -226,9 +218,9 @@ authApi.interceptors.response.use(
 
     // 인증 오류 처리 - 즉시 로그아웃
     const immediateLogoutCodes = [
-      ERROR_CODES.TOKEN_LOGGED_OUT,
-      ERROR_CODES.INVALID_TOKEN,
-      ERROR_CODES.UNAUTHORIZED,
+      RESPONSE_CODES.TOKEN_LOGGED_OUT,
+      RESPONSE_CODES.INVALID_TOKEN,
+      RESPONSE_CODES.UNAUTHORIZED,
     ];
 
     if (immediateLogoutCodes.includes(errorCode)) {
@@ -245,8 +237,8 @@ authApi.interceptors.response.use(
 
     // 접근 권한 오류 처리
     const forbiddenErrorCodes = [
-      ERROR_CODES.FORBIDDEN,
-      ERROR_CODES.INACTIVE_USER,
+      RESPONSE_CODES.FORBIDDEN,
+      RESPONSE_CODES.INACTIVE_USER,
     ];
 
     if (forbiddenErrorCodes.includes(errorCode)) {
