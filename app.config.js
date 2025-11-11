@@ -45,6 +45,7 @@ export default {
 
   android: {
     package: process.env.MYCODE_BUNDLE_IDENTIFIER,
+    versionCode: 36,
     edgeToEdgeEnabled: true,
     icon: "./assets/mycode_icon.png",
     backgroundColor: "#111111",
