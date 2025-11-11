@@ -14,6 +14,8 @@ import HeartIcon from "@/components/icons/HeartIcon";
 import NewChevronRight from "@/components/icons/NewChevronRight";
 import CommonModal from "@/components/ui/CommonModal";
 import Separator from "@/components/ui/Separator";
+import { authApi } from "@/features/axios/axiosInstance";
+import { RESPONSE_CODES } from "@/features/axios/responseCodes";
 import useUserStore, {
   useIsLoggedIn,
   useNickname,
@@ -35,58 +37,8 @@ export default function MyScreen() {
   const nickname = useNickname();
   const profileImage = useProfileImage();
 
-  const handleAuthAction = async () => {
-    // 항상 로그아웃 확인 모달 표시
-    setShowLogoutAlert(true);
-  };
-
-  const handleLogoutConfirm = async () => {
-    try {
-      // 로그아웃 API 호출
-      // const response = await authApi.post("/auth/logout");
-
-      // 로컬 저장소에서 토큰 및 사용자 정보 삭제
-      await SecureStore.deleteItemAsync("accessToken");
-      await SecureStore.deleteItemAsync("refreshToken");
-      await SecureStore.deleteItemAsync("nickname");
-      await SecureStore.deleteItemAsync("profileImage");
-      await SecureStore.deleteItemAsync("userRegions");
-
-      const { clearUserInfo } = useUserStore.getState().action;
-      clearUserInfo();
-
-      setShowLogoutAlert(false);
-
-      // 성공 모달 표시
-      setStatusModalMessage("로그아웃이 완료되었습니다.");
-      setShowStatusModal(true);
-
-      // 모달 표시 후 화면 이동
-      setTimeout(() => {
-        setShowStatusModal(false);
-        router.dismissAll();
-        router.push("/");
-      }, 1500);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      setShowLogoutAlert(false);
-
-      // 에러 모달 표시
-      setStatusModalMessage(
-        `로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`,
-      );
-      setShowStatusModal(true);
-    }
-  };
-
-  const handleLogoutCancel = () => {
-    setShowLogoutAlert(false);
-  };
-
-  // 화면 포커스 시 실행
   useFocusEffect(
     useCallback(() => {
-      // StatusBar 스타일을 dark로 설정
       setStatusBarStyle("dark");
 
       // 모달 상태 초기화
@@ -141,7 +93,52 @@ export default function MyScreen() {
     }, []),
   );
 
-  // 프로필 수정 버튼 클릭 핸들러
+  const handleLogoutPress = () => setShowLogoutAlert(true);
+  const handleLogoutCancel = () => setShowLogoutAlert(false);
+
+  const handleLogoutConfirm = async () => {
+    try {
+      const logoutResponse = await authApi.post("/auth/logout");
+
+      if (logoutResponse.data.code === RESPONSE_CODES.LOGOUT_SUCCESS) {
+        await SecureStore.deleteItemAsync("accessToken");
+        await SecureStore.deleteItemAsync("refreshToken");
+        await SecureStore.deleteItemAsync("nickname");
+        await SecureStore.deleteItemAsync("profileImage");
+        await SecureStore.deleteItemAsync("userRegions");
+
+        const { clearUserInfo } = useUserStore.getState().action;
+        clearUserInfo();
+
+        setShowLogoutAlert(false);
+        setStatusModalMessage("로그아웃이 완료되었습니다.");
+        setShowStatusModal(true);
+
+        // 모달 표시 후 화면 이동
+        setTimeout(() => {
+          setShowStatusModal(false);
+          router.dismissAll();
+          router.push("/");
+        }, 1500);
+      } else {
+        setShowLogoutAlert(false);
+        setStatusModalMessage(
+          `로그아웃에 실패했습니다. (코드: ${logoutResponse.data.code})`,
+        );
+        setShowStatusModal(true);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      setShowLogoutAlert(false);
+
+      // 에러 모달 표시
+      setStatusModalMessage(
+        `로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`,
+      );
+      setShowStatusModal(true);
+    }
+  };
+
   const handleEditProfile = () => {
     if (!isLoggedIn) {
       setLoginPromptMessage("프로필을 수정하려면 먼저 로그인해주세요.");
@@ -151,24 +148,7 @@ export default function MyScreen() {
     router.push("/edit-profile");
   };
 
-  // 프로필 이미지 결정 로직
-  const getProfileImageSource = () => {
-    if (!isLoggedIn) {
-      return null;
-    }
-    return profileImage && profileImage.trim() !== "" ? profileImage : null;
-  };
-
-  // 닉네임 결정 로직
-  const getDisplayName = () => {
-    if (!isLoggedIn) {
-      return "사용자";
-    }
-    return nickname || "사용자";
-  };
-
-  // 나의일정 버튼 클릭 핸들러
-  const handlePlan = () => {
+  const handleNavigateToPlan = () => {
     if (!isLoggedIn) {
       setLoginPromptMessage("나의일정을 보려면 먼저 로그인해주세요.");
       setShowLoginPromptModal(true);
@@ -177,8 +157,7 @@ export default function MyScreen() {
     router.push("/plan");
   };
 
-  // 관심목록 버튼 클릭 핸들러
-  const handleLike = () => {
+  const handleNavigateToLike = () => {
     if (!isLoggedIn) {
       setLoginPromptMessage("관심목록을 보려면 먼저 로그인해주세요.");
       setShowLoginPromptModal(true);
@@ -187,8 +166,7 @@ export default function MyScreen() {
     router.push("/like");
   };
 
-  // 취향 분석하기 버튼 클릭 핸들러
-  const handleSurvey = () => {
+  const handleNavigateToSurvey = () => {
     if (!isLoggedIn) {
       setLoginPromptMessage("취향 분석을 하려면 먼저 로그인해주세요.");
       setShowLoginPromptModal(true);
@@ -212,9 +190,9 @@ export default function MyScreen() {
             className="mt-4 flex h-[60px] flex-row px-4"
           >
             <View className="size-[60px] overflow-hidden rounded-full">
-              {getProfileImageSource() ? (
+              {profileImage && profileImage.trim() !== "" ? (
                 <Image
-                  source={getProfileImageSource()}
+                  source={profileImage}
                   style={{ width: 60, height: 60 }}
                 />
               ) : (
@@ -223,7 +201,7 @@ export default function MyScreen() {
             </View>
             <View className="ml-2 h-full justify-center p-2">
               <Text className="mr-1 text-xl font-medium">
-                {getDisplayName()}
+                {nickname || "사용자"}
               </Text>
             </View>
           </View>
@@ -239,7 +217,7 @@ export default function MyScreen() {
 
           <View className="mx-4 my-4 flex flex-row items-center justify-center rounded-lg bg-[#F2F3F6]">
             <Pressable
-              onPress={handlePlan}
+              onPress={handleNavigateToPlan}
               className="m-2 flex h-[70px] w-[105px] items-center justify-center rounded-lg active:bg-gray-200"
             >
               <DiaryIcon />
@@ -250,7 +228,7 @@ export default function MyScreen() {
               className="h-[20px] w-[1px] bg-[#DDDFE6]"
             />
             <Pressable
-              onPress={handleLike}
+              onPress={handleNavigateToLike}
               className="m-2 flex h-[70px] w-[105px] items-center justify-center rounded-lg active:bg-gray-200"
             >
               <HeartIcon />
@@ -261,7 +239,7 @@ export default function MyScreen() {
               className="h-[20px] w-[1px] bg-[#DDDFE6]"
             />
             <Pressable
-              onPress={handleSurvey}
+              onPress={handleNavigateToSurvey}
               className="m-2 flex h-[70px] w-[105px] items-center justify-center rounded-lg active:bg-gray-200"
             >
               <CalendarEditIcon />
@@ -312,7 +290,7 @@ export default function MyScreen() {
         {isLoggedIn && (
           <>
             <Pressable
-              onPress={handleAuthAction}
+              onPress={handleLogoutPress}
               className="flex h-14 w-full flex-row items-center justify-between rounded-lg px-2 active:bg-gray-100"
             >
               <Text className="text-lg">로그아웃</Text>
