@@ -4,7 +4,7 @@ export default {
   name: "마이코드",
   slug: "mycode",
   owner: "donggukim",
-  version: "1.0.4",
+  version: "1.0.5",
   orientation: "portrait",
   icon: "./assets/mycode_icon.png",
   scheme: "mycode",
@@ -16,7 +16,7 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "35",
+    buildNumber: "36",
     backgroundColor: "#6B51FB",
     config: {
       usesNonExemptEncryption: false,
