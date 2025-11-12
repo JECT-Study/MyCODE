@@ -1,0 +1,27 @@
+diff --git a/node_modules/@shopify/react-native-skia/android/CMakeLists.txt b/node_modules/@shopify/react-native-skia/android/CMakeLists.txt
+index f48752a..2498dc1 100644
+--- a/node_modules/@shopify/react-native-skia/android/CMakeLists.txt
++++ b/node_modules/@shopify/react-native-skia/android/CMakeLists.txt
+@@ -309,3 +309,8 @@ else()
+         -lEGL
+     )
+ endif()
++
++# Support for 16KB page size (Android 15+)
++if(DEFINED CMAKE_ANDROID_NDK_VERSION AND CMAKE_ANDROID_NDK_VERSION VERSION_LESS "27")
++    target_link_options(${PACKAGE_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
++endif()
+diff --git a/node_modules/@shopify/react-native-skia/android/build.gradle b/node_modules/@shopify/react-native-skia/android/build.gradle
+index c5431ee..76c35a3 100644
+--- a/node_modules/@shopify/react-native-skia/android/build.gradle
++++ b/node_modules/@shopify/react-native-skia/android/build.gradle
+@@ -156,7 +156,8 @@ android {
+                 arguments '-DANDROID_STL=c++_shared',
+                           "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
+                           "-DNODE_MODULES_DIR=${nodeModules}",
+-                          "-DPREBUILT_DIR=${prebuiltDir}"
++                          "-DPREBUILT_DIR=${prebuiltDir}",
++                          "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+ 
+             }
+         }

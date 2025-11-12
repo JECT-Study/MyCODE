@@ -80,6 +80,16 @@ export default {
             "https://repository.map.naver.com/archive/maven",
           ],
           usesCleartextTraffic: true,
+          // Android 15+ 16KB 메모리 페이지 크기 지원
+          enable16kPageSize: true,
+          // 네이티브 라이브러리를 16KB 정렬로 컴파일
+          extraCmakeArgs: ["-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"],
+          packagingOptions: {
+            jniLibs: {
+              // 16KB 페이지 크기 지원을 위해 압축 패키징 사용 (AGP 8.5 이하)
+              useLegacyPackaging: true,
+            },
+          },
         },
       },
     ],
