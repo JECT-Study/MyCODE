@@ -2,12 +2,16 @@
 
 > 문화행사 정보를 한 곳에서 관리하고 검색할 수 있는 크로스 플랫폼 애플리케이션
 
-[![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android-lightgrey?style=flat)](https://expo.dev/)
-[![App Store](https://img.shields.io/badge/App%20Store-Download-0D96F6?style=flat&logo=app-store&logoColor=white)](https://apps.apple.com/kr/app/%EB%A7%88%EC%9D%B4%EC%BD%94%EB%93%9C/id6751580479)
+<p align="left" style="display: flex; align-items: center;">
+  <a href="https://apps.apple.com/kr/app/%EB%A7%88%EC%9D%B4%EC%BD%94%EB%93%9C/id6751580479">
+    <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1280617600" alt="Download on the App Store" style="width: 170px; height: 57px;">
+  </a>
+  <a href="https://play.google.com/store/apps/details?id=com.ject3.mycode">
+    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="width: 196px; height: 85px;">
+  </a>
+</p>
 
 <img width="5760" height="3240" alt="27" src="https://github.com/user-attachments/assets/3983cddc-0a54-4617-8ea6-826487bb41ec" />
-
-
 
 ## 목차
 
@@ -35,23 +39,28 @@ Expo와 React Native를 기반으로 iOS, Android 플랫폼을 지원합니다.
 ## 기술 스택
 
 ### Core
+
 - **React Native** 0.79.3
 - **Expo SDK** ~53.0
 - **TypeScript** ~5.8.3
 - **React** 19.0.0
 
 ### Navigation & Routing
+
 - **Expo Router** ~5.1.4
 - **React Navigation** 7.x
 
 ### Styling
+
 - **NativeWind** 4.x (TailwindCSS for React Native)
 - **TailwindCSS** 3.4.17
 
 ### State Management
+
 - **Zustand** 5.x
 
 ### Key Libraries
+
 - **@react-native-kakao** - Kakao SDK (로그인, 공유)
 - **@mj-studio/react-native-naver-map** - Naver Map
 - **expo-apple-authentication** - Apple 로그인
