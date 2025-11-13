@@ -2,14 +2,20 @@
 
 > 문화행사 정보를 한 곳에서 관리하고 검색할 수 있는 크로스 플랫폼 애플리케이션
 
-<p align="left" style="display: flex; align-items: center;">
-  <a href="https://apps.apple.com/kr/app/%EB%A7%88%EC%9D%B4%EC%BD%94%EB%93%9C/id6751580479">
-    <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1280617600" alt="Download on the App Store" style="width: 170px; height: 57px;">
-  </a>
-  <a href="https://play.google.com/store/apps/details?id=com.ject3.mycode">
-    <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="width: 196px; height: 85px;">
-  </a>
-</p>
+<table>
+  <tr>
+    <td>
+      <a href="https://apps.apple.com/kr/app/%EB%A7%88%EC%9D%B4%EC%BD%94%EB%93%9C/id6751580479">
+        <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1280617600" alt="Download on the App Store" height="60">
+      </a>
+    </td>
+    <td style="padding-top: 8px;">
+      <a href="https://play.google.com/store/apps/details?id=com.ject3.mycode">
+        <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="60">
+      </a>
+    </td>
+  </tr>
+</table>
 
 <img width="5760" height="3240" alt="27" src="https://github.com/user-attachments/assets/3983cddc-0a54-4617-8ea6-826487bb41ec" />
 
