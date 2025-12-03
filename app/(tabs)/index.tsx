@@ -417,7 +417,7 @@ export default function HomeScreen() {
         <View className="w-full flex-row items-center gap-x-3">
           <LogoIcon width={35} height={32} />
           <Pressable
-            className="h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px] py-3"
+            className="min-h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px]"
             onPress={handleSearchPress}
           >
             <Text className="text-[#6E6E6E]">
