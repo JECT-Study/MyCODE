@@ -148,6 +148,8 @@ function DetailImageCarousel({
     );
   };
 
+  const isMultipleImages = carouselData.length > 1;
+
   return (
     <View
       style={{
@@ -159,21 +161,24 @@ function DetailImageCarousel({
         height={imageHeight}
         data={carouselData}
         renderItem={renderCarouselItem}
-        loop={true}
+        loop={isMultipleImages}
+        enabled={isMultipleImages}
         scrollAnimationDuration={1000}
         onSnapToItem={(index) => setCurrentIndex(index)}
       />
 
-      <View className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-row">
-        {carouselData.map((_, index) => (
-          <View
-            key={index}
-            className={`mx-0.5 h-1.5 w-1.5 rounded-full ${
-              index === currentIndex ? "bg-[#D9D9D9]" : "bg-[#777777]"
-            }`}
-          />
-        ))}
-      </View>
+      {isMultipleImages && (
+        <View className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-row">
+          {carouselData.map((_, index) => (
+            <View
+              key={index}
+              className={`mx-0.5 h-1.5 w-1.5 rounded-full ${
+                index === currentIndex ? "bg-[#D9D9D9]" : "bg-[#777777]"
+              }`}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
