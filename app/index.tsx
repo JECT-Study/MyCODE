@@ -4,7 +4,6 @@ import { Marquee } from "@animatereactnative/marquee";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
 import { Platform, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +14,7 @@ import MyCodeLogo from "@/components/icons/MyCodeLogo";
 import { loginImages, LoginImageType } from "@/constants/LoginImages";
 import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
 import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
+import { checkAuthStatus } from "@/utils/authUtils";
 
 function LoginMarquee({
   imageList,
@@ -114,19 +114,12 @@ export default function Login() {
       const checkTokens = async () => {
         setStatusBarStyle("light");
 
-        try {
-          const accessToken = await SecureStore.getItemAsync("accessToken");
-          const refreshToken = await SecureStore.getItemAsync("refreshToken");
+        const isAuthenticated = await checkAuthStatus();
 
-          if (accessToken && refreshToken) {
-            setIsLoggedIn(true);
-            router.push("/(tabs)");
-          } else {
-            setIsLoggedIn(false);
-            console.log("토큰 없음 - 로그인 화면 유지");
-          }
-        } catch (error) {
-          console.error("토큰 확인 실패:", error);
+        if (isAuthenticated) {
+          setIsLoggedIn(true);
+          router.push("/(tabs)");
+        } else {
           setIsLoggedIn(false);
         }
       };

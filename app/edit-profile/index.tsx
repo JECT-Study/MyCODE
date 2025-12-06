@@ -19,6 +19,7 @@ import {
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
 import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
+import { loadUserInfo } from "@/utils/authUtils";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
@@ -48,31 +49,19 @@ export default function EditProfile() {
 
   // 페이지 진입 시 SecureStore에서 사용자 정보 로드
   useEffect(() => {
-    const loadUserInfo = async () => {
-      try {
-        const savedNickname = await SecureStore.getItemAsync("nickname");
-        const savedProfileImage =
-          await SecureStore.getItemAsync("profileImage");
+    const fetchUserInfo = async () => {
+      const { nickname, profileImage } = await loadUserInfo();
 
-        if (savedNickname) {
-          setInputNickname(savedNickname);
-        }
+      if (nickname) {
+        setInputNickname(nickname);
+      }
 
-        if (savedProfileImage) {
-          console.log(
-            "📸 SecureStore에서 불러온 프로필 이미지:",
-            savedProfileImage,
-          );
-          setCurrentProfileImage(savedProfileImage);
-        } else {
-          console.log("📸 SecureStore에 저장된 프로필 이미지 없음");
-        }
-      } catch (error) {
-        console.error("사용자 정보 로드 실패:", error);
+      if (profileImage) {
+        setCurrentProfileImage(profileImage);
       }
     };
 
-    loadUserInfo();
+    fetchUserInfo();
   }, []);
 
   // 프로필 업데이트 API 요청

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { Pressable, Text, View } from "react-native";
 
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
@@ -11,6 +10,7 @@ import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import { formatAddress } from "@/utils/addressUtils";
+import { checkAuthStatus } from "@/utils/authUtils";
 
 interface infoInterface {
   contentId: number;
@@ -46,18 +46,12 @@ export default function FavoriteContentItem({
 
   // 토큰 확인을 통한 로그인 상태 체크
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const accessToken = await SecureStore.getItemAsync("accessToken");
-        const refreshToken = await SecureStore.getItemAsync("refreshToken");
-        setIsLoggedIn(!!(accessToken && refreshToken));
-      } catch (error) {
-        console.error("토큰 확인 실패:", error);
-        setIsLoggedIn(false);
-      }
+    const verifyAuth = async () => {
+      const isAuthenticated = await checkAuthStatus();
+      setIsLoggedIn(isAuthenticated);
     };
 
-    checkAuthStatus();
+    verifyAuth();
   }, []);
 
   // 초기 좋아요 상태 설정

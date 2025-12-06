@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 import * as Clipboard from "expo-clipboard";
 import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import {
   Alert,
   Dimensions,
@@ -44,6 +43,7 @@ import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { checkAuthStatus } from "@/utils/authUtils";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 const IMAGE_HEIGHT = 350;
@@ -215,18 +215,12 @@ export default function DetailScreen() {
 
   // 토큰 확인을 통한 로그인 상태 체크 코드
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const accessToken = await SecureStore.getItemAsync("accessToken");
-        const refreshToken = await SecureStore.getItemAsync("refreshToken");
-        setIsLoggedIn(!!(accessToken && refreshToken));
-      } catch (error) {
-        console.error("토큰 확인 실패:", error);
-        setIsLoggedIn(false);
-      }
+    const verifyAuth = async () => {
+      const isAuthenticated = await checkAuthStatus();
+      setIsLoggedIn(isAuthenticated);
     };
 
-    checkAuthStatus();
+    verifyAuth();
   }, []);
 
   useEffect(() => {
@@ -269,7 +263,6 @@ export default function DetailScreen() {
     try {
       const appStoreUrl = "https://apps.apple.com/kr/app/mycode/id6751580479";
       const deepLinkUrl = `mycode://detail/${id}`;
-      console.log("🚀 카카오 공유 딥링크:", deepLinkUrl);
 
       await shareFeedTemplate({
         template: {
@@ -317,7 +310,6 @@ export default function DetailScreen() {
     try {
       await Clipboard.setStringAsync(contentData!.address);
       setShowCopyToast(true);
-      console.log("주소가 복사되었습니다.");
     } catch (error) {
       console.error("복사 오류:", error);
     }
@@ -511,8 +503,6 @@ export default function DetailScreen() {
       openNaverMap();
     }
   };
-
-  console.log(contentData?.introduction);
 
   return (
     <>

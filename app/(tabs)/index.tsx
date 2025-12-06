@@ -6,7 +6,6 @@ import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
@@ -35,6 +34,7 @@ import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
+import { checkAuthStatus, loadUserInfo } from "@/utils/authUtils";
 import { mapUserRegionNameToKey } from "@/utils/searchUtils";
 
 // dayjs 한국어 로케일 설정
@@ -168,38 +168,30 @@ export default function HomeScreen() {
       // StatusBar 스타일을 light로 설정
       setStatusBarStyle("light");
 
-      const checkLoginStatus = async () => {
-        try {
-          const accessToken = await SecureStore.getItemAsync("accessToken");
-          const refreshToken = await SecureStore.getItemAsync("refreshToken");
+      const syncLoginStatus = async () => {
+        const isAuthenticated = await checkAuthStatus();
 
-          if (accessToken && refreshToken) {
-            setIsLoggedIn(true);
+        if (isAuthenticated) {
+          setIsLoggedIn(true);
 
-            // nickname과 userRegions를 SecureStore에서 불러와서 Store에 설정
-            const storedNickname = await SecureStore.getItemAsync("nickname");
-            const storedUserRegions =
-              await SecureStore.getItemAsync("userRegions");
+          // nickname과 userRegions를 SecureStore에서 불러와서 Store에 설정
+          const { nickname, userRegions } = await loadUserInfo();
 
-            const { setNickname, setUserRegions } =
-              useUserStore.getState().action;
+          const { setNickname, setUserRegions } =
+            useUserStore.getState().action;
 
-            if (storedNickname) {
-              setNickname(storedNickname);
-            }
-            if (storedUserRegions) {
-              setUserRegions(JSON.parse(storedUserRegions));
-            }
-          } else {
-            setIsLoggedIn(false);
+          if (nickname) {
+            setNickname(nickname);
           }
-        } catch (error) {
-          console.log("❌ 토큰 확인 중 에러:", error);
+          if (userRegions.length > 0) {
+            setUserRegions(userRegions);
+          }
+        } else {
           setIsLoggedIn(false);
         }
       };
 
-      checkLoginStatus();
+      syncLoginStatus();
     }, []),
   );
 

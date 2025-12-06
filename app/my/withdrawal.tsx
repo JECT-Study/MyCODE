@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import {
   LayoutChangeEvent,
   Pressable,
@@ -24,7 +23,7 @@ import Separator from "@/components/ui/Separator";
 import { WithdrawUrl } from "@/constants/ApiUrls";
 import { reason } from "@/constants/WithDrawal";
 import { authApi } from "@/features/axios/axiosInstance";
-import useUserStore from "@/stores/useUserStore";
+import { handleLogout } from "@/utils/authUtils";
 
 export default function Withdrawal() {
   const [contentHeight, setContentHeight] = useState<number>(0);
@@ -80,15 +79,7 @@ export default function Withdrawal() {
       await authApi.delete(WithdrawUrl);
 
       // 토큰 및 사용자 정보 삭제
-      await SecureStore.deleteItemAsync("accessToken");
-      await SecureStore.deleteItemAsync("refreshToken");
-      await SecureStore.deleteItemAsync("nickname");
-      await SecureStore.deleteItemAsync("profileImage");
-      await SecureStore.deleteItemAsync("userRegions");
-
-      // Store 초기화
-      const { clearUserInfo } = useUserStore.getState().action;
-      clearUserInfo();
+      await handleLogout();
 
       // 로그인 화면으로 이동
       router.replace("/");

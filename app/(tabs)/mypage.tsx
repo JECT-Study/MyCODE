@@ -3,7 +3,6 @@ import { useCallback, useRef, useState } from "react";
 import { AxiosError } from "axios";
 import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { setStatusBarStyle } from "expo-status-bar";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
@@ -21,6 +20,7 @@ import useUserStore, {
   useNickname,
   useProfileImage,
 } from "@/stores/useUserStore";
+import { checkAuthStatus, handleLogout, loadUserInfo } from "@/utils/authUtils";
 
 export default function MyScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -47,25 +47,24 @@ export default function MyScreen() {
       setShowLoginPromptModal(false);
 
       // SecureStore의 토큰을 확인하고 로그인 상태 동기화
-      const checkLoginStatus = async () => {
+      const syncLoginStatus = async () => {
         try {
           // 첫 로드일 때만 로딩 스피너 표시
           if (isFirstLoad.current) {
             setIsLoading(true);
           }
 
-          const accessToken = await SecureStore.getItemAsync("accessToken");
-          const refreshToken = await SecureStore.getItemAsync("refreshToken");
-
+          const isAuthenticated = await checkAuthStatus();
           const { setLoggedIn } = useUserStore.getState().action;
 
-          if (accessToken && refreshToken) {
+          if (isAuthenticated) {
             setLoggedIn(true);
 
             // nickname과 profileImage도 SecureStore에서 불러와서 Store에 설정
-            const storedNickname = await SecureStore.getItemAsync("nickname");
-            const storedProfileImage =
-              await SecureStore.getItemAsync("profileImage");
+            const {
+              nickname: storedNickname,
+              profileImage: storedProfileImage,
+            } = await loadUserInfo();
 
             const { setNickname, setProfileImage } =
               useUserStore.getState().action;
@@ -80,7 +79,7 @@ export default function MyScreen() {
             setLoggedIn(false);
           }
         } catch (error) {
-          console.log("❌ 토큰 확인 중 에러:", error);
+          console.error("토큰 확인 중 에러:", error);
         } finally {
           if (isFirstLoad.current) {
             setIsLoading(false);
@@ -89,7 +88,7 @@ export default function MyScreen() {
         }
       };
 
-      checkLoginStatus();
+      syncLoginStatus();
     }, []),
   );
 
@@ -101,14 +100,7 @@ export default function MyScreen() {
       const logoutResponse = await authApi.post("/auth/logout");
 
       if (logoutResponse.data.code === RESPONSE_CODES.LOGOUT_SUCCESS) {
-        await SecureStore.deleteItemAsync("accessToken");
-        await SecureStore.deleteItemAsync("refreshToken");
-        await SecureStore.deleteItemAsync("nickname");
-        await SecureStore.deleteItemAsync("profileImage");
-        await SecureStore.deleteItemAsync("userRegions");
-
-        const { clearUserInfo } = useUserStore.getState().action;
-        clearUserInfo();
+        await handleLogout();
 
         setShowLogoutAlert(false);
         setStatusModalMessage("로그아웃이 완료되었습니다.");
@@ -131,7 +123,6 @@ export default function MyScreen() {
       const axiosError = error as AxiosError;
       setShowLogoutAlert(false);
 
-      // 에러 모달 표시
       setStatusModalMessage(
         `로그아웃 도중 에러가 발생했습니다. ${axiosError.message}`,
       );

@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
 import { RESPONSE_CODES } from "@/features/axios/responseCodes";
+import { handleLogout } from "@/utils/authUtils";
 
 const baseURL = Constants.expoConfig?.extra?.BACKEND_URL ?? "";
 
@@ -51,18 +52,13 @@ authApi.interceptors.request.use(
 
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
-      } else {
-        console.log("액세스 토큰이 없습니다. 로그인이 필요할 수 있습니다.");
       }
     } catch (error) {
       console.error("토큰 조회 실패:", error);
     }
     return config;
   },
-  (error) => {
-    console.error("Request 인터셉터 에러:", error);
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 authApi.interceptors.response.use(
@@ -102,32 +98,11 @@ authApi.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log("토큰 갱신:", {
-          reason:
-            errorCode === RESPONSE_CODES.TOKEN_EXPIRED
-              ? "토큰 만료 (4011)"
-              : httpStatus === 401
-                ? "인증 실패 (401)"
-                : "서버 에러로 인한 토큰 갱신 시도",
-          httpStatus,
-          backendCode: errorCode,
-          action: "리프레시 토큰으로 갱신 시도",
-        });
-
         const refreshToken = await SecureStore.getItemAsync("refreshToken");
 
         if (!refreshToken) {
           throw new Error("리프레시 토큰이 없습니다.");
         }
-
-        console.log("리프레시 토큰으로 갱신 요청 중...", {
-          baseURL: publicApi.defaults.baseURL,
-          endpoint: "/auth/token/refresh",
-          fullURL: `${publicApi.defaults.baseURL}/auth/token/refresh`,
-          method: "POST",
-          hasRefreshToken: !!refreshToken,
-          refreshTokenLength: refreshToken?.length,
-        });
 
         // 리프레시 토큰으로 새 액세스 토큰 요청 (헤더로 전달)
         const refreshResponse = await publicApi.post(
@@ -139,12 +114,6 @@ authApi.interceptors.response.use(
             },
           },
         );
-
-        console.log("토큰 갱신 응답 성공:", {
-          status: refreshResponse.status,
-          hasAccessToken: !!refreshResponse.data.result?.accessToken,
-          hasRefreshToken: !!refreshResponse.data.result?.refreshToken,
-        });
 
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
           refreshResponse.data.result;
@@ -166,22 +135,9 @@ authApi.interceptors.response.use(
         // 대기 중인 요청들에 새 토큰 전달
         processQueue(null, newAccessToken);
 
-        console.log("토큰 갱신 성공:", {
-          action: "원래 요청 재시도",
-          url: originalRequest.url,
-        });
         return await authApi(originalRequest);
       } catch (refreshError) {
         const refreshErrorCode = (refreshError as any).response?.data?.code;
-        const refreshHttpStatus = (refreshError as any).response?.status;
-
-        console.error("토큰 갱신 실패:", {
-          httpStatus: refreshHttpStatus,
-          backendCode: refreshErrorCode,
-          message: (refreshError as any).response?.data?.message,
-          fullResponse: (refreshError as any).response?.data,
-          errorType: (refreshError as any).constructor?.name,
-        });
 
         // 대기 중인 요청들에 에러 전달
         processQueue(refreshError, null);
@@ -195,18 +151,7 @@ authApi.interceptors.response.use(
         ];
 
         if (authErrorCodes.includes(refreshErrorCode)) {
-          await SecureStore.deleteItemAsync("accessToken");
-          await SecureStore.deleteItemAsync("refreshToken");
-          await SecureStore.deleteItemAsync("nickname");
-          await SecureStore.deleteItemAsync("profileImage");
-          await SecureStore.deleteItemAsync("userRegions");
-
-          console.log("로그아웃:", {
-            reason: "토큰 갱신 실패",
-            httpStatus: refreshHttpStatus,
-            backendCode: refreshErrorCode,
-            action: "로그인 페이지로 이동",
-          });
+          await handleLogout();
           router.replace("/");
         }
 
@@ -224,14 +169,7 @@ authApi.interceptors.response.use(
     ];
 
     if (immediateLogoutCodes.includes(errorCode)) {
-      await SecureStore.deleteItemAsync("accessToken");
-      await SecureStore.deleteItemAsync("refreshToken");
-      console.log("로그아웃:", {
-        reason: "인증 오류",
-        httpStatus,
-        backendCode: errorCode,
-        action: "로그인 페이지로 이동",
-      });
+      await handleLogout();
       router.replace("/");
     }
 
@@ -242,26 +180,9 @@ authApi.interceptors.response.use(
     ];
 
     if (forbiddenErrorCodes.includes(errorCode)) {
-      await SecureStore.deleteItemAsync("accessToken");
-      await SecureStore.deleteItemAsync("refreshToken");
-      console.log("로그아웃:", {
-        reason: "접근 권한 오류",
-        httpStatus,
-        backendCode: errorCode,
-        action: "로그인 페이지로 이동",
-      });
+      await handleLogout();
       router.replace("/");
     }
-
-    // 에러 상세 정보 로깅
-    console.error("API 에러 발생:", {
-      httpStatus, // HTTP 상태 코드 (3자리)
-      backendCode: errorCode, // 백엔드 커스텀 에러 코드 (4자리)
-      message: error.response?.data?.message,
-      isSuccess: error.response?.data?.isSuccess,
-      url: error.config?.url,
-      method: error.config?.method?.toUpperCase(),
-    });
 
     return Promise.reject(error);
   },
