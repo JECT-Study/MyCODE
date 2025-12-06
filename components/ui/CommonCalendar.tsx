@@ -82,8 +82,6 @@ export default function CommonCalendar({
   // 월 변경 시 호출되는 핸들러 - 월이 바뀔 때마다 실행
   const handleMonthChange = useCallback(
     (month: DateData) => {
-      console.log("월 변경");
-
       // 현재 selectedDate의 월과 다른 경우에만 업데이트
       const currentSelectedMonth = dayjs(selectedDate).format("YYYY-MM");
       const newMonth = dayjs(month.dateString).format("YYYY-MM");

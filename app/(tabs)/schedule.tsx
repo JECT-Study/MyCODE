@@ -99,16 +99,11 @@ export default function ScheduleScreen() {
 
           setCurrentPage(number);
           setHasMoreData(number < totalPages);
-
-          console.log(
-            `스케줄 데이터 로딩 완료: ${date}, 페이지 ${number}/${totalPages}`,
-          );
         } else {
           if (!isLoadMore) {
             setSchedules([]);
           }
           setHasMoreData(false);
-          console.log("스케줄 데이터 없음 또는 API 오류");
         }
       } catch (error) {
         console.error("스케줄 데이터 로딩 실패:", error);
@@ -137,7 +132,6 @@ export default function ScheduleScreen() {
   const handleLoadMore = useCallback(() => {
     if (hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
-      console.log(`다음 페이지 로딩: ${nextPage}`);
       fetchScheduleData(selectedDate, nextPage, true);
     }
   }, [

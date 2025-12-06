@@ -91,14 +91,10 @@ export default function SurveyScreen() {
       answers,
     };
 
-    console.log("API 전송 데이터:", requestBody);
-
     try {
       const response = await authApi.post("/trait-test", requestBody);
 
       if (response.data.isSuccess) {
-        console.log("설문 제출 성공:", response.data);
-
         // 설문 제출 성공 시 userRegions 업데이트 (id와 name 포함)
         await SecureStore.setItemAsync(
           "userRegions",

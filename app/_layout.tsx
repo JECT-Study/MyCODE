@@ -80,13 +80,9 @@ export default function RootLayout() {
         const { target, id } = parsed.queryParams;
 
         if (target === "detail" && id) {
-          console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
-
           // 앱이 백그라운드에서 실행 중일 때는 활성화될 때까지 대기
           const handleAppStateChange = (nextAppState: string) => {
-            console.log("앱 상태 변경:", nextAppState);
             if (nextAppState === "active") {
-              console.log("앱 활성화됨 - detail 페이지로 이동");
               router.push(`/detail/${id}`);
               subscription.remove();
             }
@@ -122,7 +118,6 @@ export default function RootLayout() {
             const { target, id } = parsed.queryParams;
 
             if (target === "detail" && id) {
-              console.log("📍 detail 페이지로 이동:", `/detail/${id}`);
               // 약간의 딜레이 후 네비게이션 (KakaoLink 처리 완료 대기)
               setTimeout(() => {
                 router.push(`/detail/${id}`);

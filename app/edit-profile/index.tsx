@@ -116,8 +116,6 @@ export default function EditProfile() {
 
         // 이미지를 FormData에 추가
         formData.append("image", imageFile);
-      } else {
-        console.log("No new image selected, profileUri:", profileUri);
       }
 
       const response = await authApi.patch(
@@ -186,32 +184,23 @@ export default function EditProfile() {
 
   // 이미지 소스 결정 로직
   const getImageSource = () => {
-    console.log("🔍 getImageSource 호출됨");
-    console.log("  - profileUri:", profileUri);
-    console.log("  - currentProfileImage:", currentProfileImage);
-
     // profileUri가 실제 이미지 URI인지 확인 (기본 SVG가 아닌 경우)
     const hasNewImage =
       profileUri &&
       profileUri.trim() !== "" &&
       !profileUri.startsWith("data:image/svg+xml");
 
-    console.log("  - hasNewImage:", hasNewImage);
-
     // 1. 새로 선택한 이미지가 있으면 사용
     if (hasNewImage) {
-      console.log("✅ 새로 선택한 이미지 사용:", profileUri);
       return profileUri;
     }
 
     // 2. 현재 사용자의 프로필 이미지가 있으면 사용
     if (currentProfileImage && currentProfileImage.trim() !== "") {
-      console.log("✅ 현재 프로필 이미지 사용:", currentProfileImage);
       return currentProfileImage;
     }
 
     // 3. 둘 다 없으면 null 반환 (기본 아이콘 사용)
-    console.log("✅ 기본 아이콘 사용");
     return null;
   };
 

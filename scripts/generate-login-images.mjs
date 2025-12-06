@@ -31,5 +31,3 @@ for (const file of files) {
 lines.push("};");
 
 fs.writeFileSync(outputFile, lines.join("\n"), "utf-8");
-
-console.log("🚀 로그인 이미지가 최신화되었습니다.");

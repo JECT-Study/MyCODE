@@ -75,16 +75,11 @@ export default function Plan() {
 
           setCurrentPage(number);
           setHasMoreData(number < totalPages);
-
-          console.log(
-            `사용자 스케줄 데이터 로딩 완료: ${date}, 페이지 ${number}/${totalPages}`,
-          );
         } else {
           if (!isLoadMore) {
             setSchedules([]);
           }
           setHasMoreData(false);
-          console.log("사용자 스케줄 데이터 없음 또는 API 오류");
         }
       } catch (error) {
         console.error("사용자 스케줄 데이터 로딩 실패:", error);
@@ -120,7 +115,6 @@ export default function Plan() {
   const handleLoadMore = useCallback(() => {
     if (hasMoreData && !isLoadingMore) {
       const nextPage = currentPage + 1;
-      console.log(`다음 페이지 로딩: ${nextPage}`);
       fetchScheduleData(selectedDate, nextPage, true);
     }
   }, [
@@ -149,21 +143,15 @@ export default function Plan() {
 
   // 메뉴 버튼 클릭 핸들러
   const handleMenuPress = useCallback((contentId: number) => {
-    console.log("메뉴 버튼 클릭됨. contentId:", contentId);
     setSelectedContentId(contentId);
     setShowBottomSheet(true);
   }, []);
 
   // 바텀시트 삭제 클릭 핸들러
   const handleBottomSheetDelete = useCallback(() => {
-    console.log(
-      "바텀시트 삭제 버튼 클릭. selectedContentId:",
-      selectedContentId,
-    );
     setShowBottomSheet(false);
     setShowDeleteAlert(true);
-    // selectedContentId는 여기서 null로 설정하지 않음 (Alert에서 사용해야 하므로)
-  }, [selectedContentId]);
+  }, []);
 
   // 바텀시트 취소 핸들러
   const handleBottomSheetCancel = useCallback(() => {
@@ -173,17 +161,11 @@ export default function Plan() {
 
   // 삭제 확인 핸들러
   const handleDeleteConfirm = useCallback(async () => {
-    console.log("삭제 확인. selectedContentId:", selectedContentId);
     if (!selectedContentId) {
-      console.log("selectedContentId가 null입니다");
       return;
     }
 
     try {
-      console.log(
-        "삭제 API 호출:",
-        `${BACKEND_URL}/contents/${selectedContentId}/my-schedules`,
-      );
       const response = await authApi.delete(
         `${BACKEND_URL}/contents/${selectedContentId}/my-schedules`,
       );
@@ -193,7 +175,6 @@ export default function Plan() {
         setSchedules((prev) =>
           prev.filter((item) => item.contentId !== selectedContentId),
         );
-        console.log("일정 삭제 성공:", selectedContentId);
         // 토스트 표시
         setShowToast(true);
       } else {
@@ -297,7 +278,6 @@ export default function Plan() {
       <ActionBottomSheet
         isOpen={showBottomSheet}
         onClose={() => {
-          console.log("바텀시트 onClose 호출됨 - selectedContentId 유지");
           setShowBottomSheet(false);
           // selectedContentId는 건드리지 않음
         }}
