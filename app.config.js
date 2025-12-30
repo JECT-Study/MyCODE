@@ -18,6 +18,7 @@ export default {
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
     buildNumber: "36",
     backgroundColor: "#6B51FB",
+    googleServicesFile: "./GoogleService-Info.plist",
     config: {
       usesNonExemptEncryption: false,
     },
@@ -49,6 +50,7 @@ export default {
     edgeToEdgeEnabled: true,
     icon: "./assets/mycode_icon.png",
     backgroundColor: "#111111",
+    googleServicesFile: "./google-services.json",
   },
 
   web: {
@@ -91,6 +93,9 @@ export default {
             },
           },
         },
+        ios: {
+          useFrameworks: "static",
+        },
       },
     ],
     [
@@ -121,6 +126,7 @@ export default {
     ],
     "expo-maps",
     "./plugins/withAndroidQueries",
+    "@react-native-firebase/app",
   ],
 
   experiments: {

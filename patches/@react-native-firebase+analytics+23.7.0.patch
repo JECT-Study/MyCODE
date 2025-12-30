@@ -1,0 +1,24 @@
+diff --git a/node_modules/@react-native-firebase/analytics/lib/index.js b/node_modules/@react-native-firebase/analytics/lib/index.js
+index 581af58..b705a86 100644
+--- a/node_modules/@react-native-firebase/analytics/lib/index.js
++++ b/node_modules/@react-native-firebase/analytics/lib/index.js
+@@ -25,15 +25,15 @@ import {
+   isOneOf,
+   isString,
+   isUndefined,
+-} from '@react-native-firebase/app/lib/common';
++} from '@react-native-firebase/app/lib/common/index.js';
+ 
+ import {
+   createModuleNamespace,
+   FirebaseModule,
+   getFirebaseRoot,
+-} from '@react-native-firebase/app/lib/internal';
+-import { setReactNativeModule } from '@react-native-firebase/app/lib/internal/nativeModule';
+-import { isBoolean } from '@react-native-firebase/app/lib/common';
++} from '@react-native-firebase/app/lib/internal/index.js';
++import { setReactNativeModule } from '@react-native-firebase/app/lib/internal/nativeModule.js';
++import { isBoolean } from '@react-native-firebase/app/lib/common/index.js';
+ 
+ import { validateStruct, validateCompound } from './struct';
+ import fallBackModule from './web/RNFBAnalyticsModule';

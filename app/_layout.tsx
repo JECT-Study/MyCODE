@@ -9,7 +9,7 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as Linking from "expo-linking";
-import { Stack, useRouter } from "expo-router";
+import { Stack, usePathname, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { AppState, View } from "react-native";
@@ -18,6 +18,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { logScreenView } from "@/utils/analytics";
 
 // 전역 플래그로 초기 URL 처리 중복 방지
 let initialURLProcessed = false;
@@ -32,6 +33,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const pathname = usePathname();
+  const segments = useSegments();
   const [loaded] = useFonts({
     Pretendard: require("pretendard/dist/public/static/Pretendard-Regular.otf"),
     "Pretendard-Bold": require("pretendard/dist/public/static/Pretendard-Bold.otf"),
@@ -69,6 +72,14 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded, minTimeElapsed]);
+
+  // 화면 추적
+  useEffect(() => {
+    if (pathname) {
+      const screenName = segments.join("/") || "index";
+      logScreenView(screenName);
+    }
+  }, [pathname, segments]);
 
   // 앱이 이미 실행 중일 때만 딥링크 처리
   useEffect(() => {

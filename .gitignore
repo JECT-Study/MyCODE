@@ -40,6 +40,10 @@ yarn-error.*
 
 .env
 
+# Firebase
+google-services.json
+GoogleService-Info.plist
+
 # typescript
 *.tsbuildinfo
 
