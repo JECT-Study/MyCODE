@@ -11,6 +11,7 @@ import CommonModal from "@/components/ui/CommonModal";
 import { options, questions } from "@/constants/Surveys";
 import { authApi } from "@/features/axios/axiosInstance";
 import useUserStore from "@/stores/useUserStore";
+import { logEvent } from "@/utils/analytics";
 
 interface SurveyResult {
   step1?: number[];
@@ -131,6 +132,7 @@ export default function SurveyScreen() {
               })
             }
             onBack={() => {
+              logEvent("survey_exit_popup_open");
               setShowExitAlert(true);
             }}
             total={totalQuestions}
@@ -230,8 +232,12 @@ export default function SurveyScreen() {
         subTitle="선택한 내용은 저장되지 않아요."
         cancelText="취소"
         confirmText="확인"
-        onCancel={() => setShowExitAlert(false)}
+        onCancel={() => {
+          logEvent("survey_exit_popup_click", { action: "continue" });
+          setShowExitAlert(false);
+        }}
         onConfirm={() => {
+          logEvent("survey_exit_popup_click", { action: "exit" });
           setShowExitAlert(false);
           router.back();
         }}

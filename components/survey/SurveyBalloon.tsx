@@ -16,6 +16,7 @@ import Animated, {
 
 import Confetti from "@/components/survey/Confetti";
 import CustomHeader from "@/components/ui/CustomHeader";
+import { logEvent } from "@/utils/analytics";
 
 interface Props {
   type: "END" | "INTRO";
@@ -40,6 +41,11 @@ export default function SurveyBalloon({ type, onNext }: Props) {
     useCallback(() => {
       // StatusBar 스타일을 dark로 설정
       setStatusBarStyle("dark");
+
+      // INTRO 화면일 때만 survey_intro_view 이벤트 기록
+      if (type === "INTRO") {
+        logEvent("survey_intro_view");
+      }
 
       // 애니메이션 시작
       // 1. 타이틀 등장 (페이드인 + 슬라이드업)
@@ -167,7 +173,12 @@ export default function SurveyBalloon({ type, onNext }: Props) {
         )}
         <Pressable
           className="z-50 h-16 w-full items-center justify-center rounded-lg bg-[#6C4DFF] active:bg-[#5638E6]"
-          onPress={() => onNext()}
+          onPress={() => {
+            if (type === "INTRO") {
+              logEvent("survey_start_click");
+            }
+            onNext();
+          }}
         >
           <Text className="text-xl font-semibold text-white">
             {type === "INTRO" ? "취향 분석 시작" : "마이코드 시작하기"}

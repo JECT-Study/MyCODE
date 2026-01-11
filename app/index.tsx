@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Marquee } from "@animatereactnative/marquee";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
-import { Platform, Pressable, Text, View } from "react-native";
+import {
+  AppState,
+  AppStateStatus,
+  Platform,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleIcon from "@/components/icons/AppleIcon";
@@ -14,6 +21,7 @@ import MyCodeLogo from "@/components/icons/MyCodeLogo";
 import { loginImages, LoginImageType } from "@/constants/LoginImages";
 import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
 import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
+import { logEvent } from "@/utils/analytics";
 import { checkAuthStatus } from "@/utils/authUtils";
 
 function LoginMarquee({
@@ -64,9 +72,14 @@ function KakaoLogin({ disabled = false }: { disabled?: boolean }) {
     initializeKakao();
   }, []);
 
+  const handleKakaoLogin = () => {
+    logEvent("login_button_click", { button_id: "kakao" });
+    kakaoLogin();
+  };
+
   return (
     <Pressable
-      onPress={disabled ? undefined : kakaoLogin}
+      onPress={disabled ? undefined : handleKakaoLogin}
       disabled={disabled}
       className={`relative mx-auto h-16 w-full flex-row items-center justify-center rounded-xl bg-[#FEE700] px-6 ${
         disabled ? "opacity-50" : "active:opacity-80"
@@ -83,12 +96,17 @@ function KakaoLogin({ disabled = false }: { disabled?: boolean }) {
 }
 
 function AppleLogin({ disabled = false }: { disabled?: boolean }) {
-  const handlePress =
+  const platformLogin =
     Platform.OS === "android" ? AndroidAppleLogin : IOSAppleLogin;
+
+  const handleAppleLogin = () => {
+    logEvent("login_button_click", { button_id: "apple" });
+    platformLogin();
+  };
 
   return (
     <Pressable
-      onPress={disabled ? undefined : handlePress}
+      onPress={disabled ? undefined : handleAppleLogin}
       disabled={disabled}
       className={`relative mx-auto h-16 w-full flex-row items-center justify-center rounded-xl bg-[#F6F6F9] px-6 ${
         disabled ? "opacity-50" : "active:opacity-80"
@@ -104,6 +122,7 @@ function AppleLogin({ disabled = false }: { disabled?: boolean }) {
 
 export default function Login() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const appState = useRef(AppState.currentState);
 
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -121,9 +140,29 @@ export default function Login() {
           router.push("/(tabs)");
         } else {
           setIsLoggedIn(false);
+          logEvent("login_view");
         }
       };
       checkTokens();
+
+      const handleAppStateChange = (nextAppState: AppStateStatus) => {
+        if (
+          appState.current === "active" &&
+          nextAppState.match(/inactive|background/)
+        ) {
+          logEvent("login_exit", { exit_type: "app_background" });
+        }
+        appState.current = nextAppState;
+      };
+
+      const subscription = AppState.addEventListener(
+        "change",
+        handleAppStateChange,
+      );
+
+      return () => {
+        subscription.remove();
+      };
     }, [router, setIsLoggedIn]),
   );
 
@@ -160,7 +199,10 @@ export default function Login() {
           </View>
 
           <Pressable
-            onPress={() => router.push("/(tabs)")}
+            onPress={() => {
+              logEvent("login_button_click", { button_id: "browse" });
+              router.push("/(tabs)");
+            }}
             className="flex-row items-center justify-center px-6"
           >
             <View className="items-center">

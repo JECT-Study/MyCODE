@@ -5,6 +5,7 @@ import { router } from "expo-router";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
+import { logEvent } from "@/utils/analytics";
 import { handleLoginError, handleLoginSuccess } from "@/utils/authUtils";
 
 const kakaoNativeAppKey = Constants.expoConfig?.extra?.kakaoNativeAppKey ?? "";
@@ -47,6 +48,7 @@ export const kakaoLogin = async () => {
     });
 
     await handleLoginSuccess(response.data.result);
+    logEvent("login_complete", { method: "kakao" });
     router.push("/(tabs)");
   } catch (error: any) {
     handleLoginError(error);
