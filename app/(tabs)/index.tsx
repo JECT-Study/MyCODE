@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 
+import SectionErrorState from "@/components/error/SectionErrorState";
 import Card from "@/components/home/Card";
 import HotCard from "@/components/home/HotCard";
 import MoreCard from "@/components/home/MoreCard";
@@ -133,6 +134,14 @@ export default function HomeScreen() {
     useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
+  // 에러 상태
+  const [recommendationsError, setRecommendationsError] =
+    useState<boolean>(false);
+  const [hotFestivalError, setHotFestivalError] = useState<boolean>(false);
+  const [weekDayError, setWeekDayError] = useState<boolean>(false);
+  const [categoryContentError, setCategoryContentError] =
+    useState<boolean>(false);
+
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const { nickname, userRegions } = useUserStore();
 
@@ -206,6 +215,7 @@ export default function HomeScreen() {
         if (!skipLoading) {
           setIsLoadingRecommendations(true);
         }
+        setRecommendationsError(false);
 
         const response = await authApi.get(
           `${BACKEND_URL}/home/recommendations?category=${category}`,
@@ -216,9 +226,8 @@ export default function HomeScreen() {
         }
       } catch (error) {
         console.error(error);
-
-        // 에러 시 빈 배열로 설정
         setRecommendationsData([]);
+        setRecommendationsError(true);
       } finally {
         if (!skipLoading) {
           setIsLoadingRecommendations(false);
@@ -233,6 +242,7 @@ export default function HomeScreen() {
       if (!skipLoading) {
         setIsLoadingHotFestival(true);
       }
+      setHotFestivalError(false);
 
       const response = await publicApi.get(`${BACKEND_URL}/home/festival/hot`);
 
@@ -242,6 +252,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.error(error);
       setHotFestivalData([]);
+      setHotFestivalError(true);
     } finally {
       if (!skipLoading) {
         setIsLoadingHotFestival(false);
@@ -255,6 +266,7 @@ export default function HomeScreen() {
         if (!skipLoading) {
           setIsLoadingWeekDay(true);
         }
+        setWeekDayError(false);
 
         const weekDays = getWeekDays();
         const selectedDayData = weekDays.find(
@@ -277,6 +289,7 @@ export default function HomeScreen() {
       } catch (error) {
         console.error(error);
         setWeekDayData([]);
+        setWeekDayError(true);
       } finally {
         if (!skipLoading) {
           setIsLoadingWeekDay(false);
@@ -291,6 +304,7 @@ export default function HomeScreen() {
       if (!skipLoading) {
         setIsLoadingCategoryContent(true);
       }
+      setCategoryContentError(false);
 
       const response = await publicApi.get(`${BACKEND_URL}/home/category`);
 
@@ -300,6 +314,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.error(error);
       setCategoryContentData([]);
+      setCategoryContentError(true);
     } finally {
       if (!skipLoading) {
         setIsLoadingCategoryContent(false);
@@ -524,6 +539,18 @@ export default function HomeScreen() {
                 <View className="h-[333px] w-full items-center justify-center">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
+              ) : recommendationsError ? (
+                <View className="px-[18px]">
+                  <SectionErrorState
+                    title="맞춤 콘텐츠를 불러올 수 없습니다"
+                    onRetry={() =>
+                      fetchRecommendationsByCategory(
+                        selectedRecommendationsCategory,
+                      )
+                    }
+                    height={333}
+                  />
+                </View>
               ) : (
                 <FlatList
                   data={chunkedRecommendationsData}
@@ -547,60 +574,65 @@ export default function HomeScreen() {
                 />
               )}
 
-              {(!isLoggedIn || (isLoggedIn && userRegions.length === 0)) && (
-                <BlurView
-                  intensity={8}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <View className="absolute inset-0 bg-white/95" />
-                  <View className="items-center gap-y-3">
-                    <LockWithSparkles width={144} height={117} />
-                    <View>
-                      <Text className="text-center text-xl font-semibold text-gray-800">
-                        이 공간은 잠시 비공개예요!
-                      </Text>
-                      <Text className="text-center text-lg text-gray-600">
-                        {!isLoggedIn
-                          ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
-                          : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
-                      </Text>
-                    </View>
-                    <Pressable
-                      onPress={() => {
-                        if (!isLoggedIn) {
-                          router.dismissAll();
-                          router.push("/");
-                        } else {
-                          router.push("/survey");
-                        }
-                      }}
-                    >
-                      <LinearGradient
-                        colors={["#7F69FE", "#6B52FB"]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        locations={[0.0073, 0.9927]}
-                        style={{
-                          borderRadius: 20,
-                          paddingHorizontal: 10,
-                          paddingVertical: 6,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 6,
+              {!recommendationsError &&
+                (!isLoggedIn || (isLoggedIn && userRegions.length === 0)) && (
+                  <BlurView
+                    intensity={8}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    <View className="absolute inset-0 bg-white/95" />
+                    <View className="items-center gap-y-3">
+                      <LockWithSparkles width={144} height={117} />
+                      <View>
+                        <Text className="text-center text-xl font-semibold text-gray-800">
+                          이 공간은 잠시 비공개예요!
+                        </Text>
+                        <Text className="text-center text-lg text-gray-600">
+                          {!isLoggedIn
+                            ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
+                            : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
+                        </Text>
+                      </View>
+                      <Pressable
+                        onPress={() => {
+                          if (!isLoggedIn) {
+                            router.dismissAll();
+                            router.push("/");
+                          } else {
+                            router.push("/survey");
+                          }
                         }}
                       >
-                        <Text className="text-base text-white">
-                          {!isLoggedIn
-                            ? "로그인하러 가기"
-                            : "취향 분석하러 가기"}
-                        </Text>
-                        <ChevronRight width={10} height={10} color="#FFFFFF" />
-                      </LinearGradient>
-                    </Pressable>
-                  </View>
-                </BlurView>
-              )}
+                        <LinearGradient
+                          colors={["#7F69FE", "#6B52FB"]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          locations={[0.0073, 0.9927]}
+                          style={{
+                            borderRadius: 20,
+                            paddingHorizontal: 10,
+                            paddingVertical: 6,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 6,
+                          }}
+                        >
+                          <Text className="text-base text-white">
+                            {!isLoggedIn
+                              ? "로그인하러 가기"
+                              : "취향 분석하러 가기"}
+                          </Text>
+                          <ChevronRight
+                            width={10}
+                            height={10}
+                            color="#FFFFFF"
+                          />
+                        </LinearGradient>
+                      </Pressable>
+                    </View>
+                  </BlurView>
+                )}
             </View>
 
             {/* 이번달 핫한 축제 */}
@@ -612,6 +644,14 @@ export default function HomeScreen() {
               {isLoadingHotFestival ? (
                 <View className="h-[154px] w-full items-center justify-center">
                   <ActivityIndicator size="large" color="#6C4DFF" />
+                </View>
+              ) : hotFestivalError ? (
+                <View className="px-[18px]">
+                  <SectionErrorState
+                    title="축제 정보를 불러올 수 없습니다"
+                    onRetry={() => fetchHotFestivalData()}
+                    height={200}
+                  />
                 </View>
               ) : (
                 <FlatList
@@ -676,6 +716,14 @@ export default function HomeScreen() {
                 <View className="h-[270px] w-full items-center justify-center">
                   <ActivityIndicator size="large" color="#6C4DFF" />
                 </View>
+              ) : weekDayError ? (
+                <View className="px-[18px]">
+                  <SectionErrorState
+                    title="콘텐츠를 불러올 수 없습니다"
+                    onRetry={() => fetchWeeklyContentData(selectedWeekDayIndex)}
+                    height={270}
+                  />
+                </View>
               ) : (
                 <FlatList
                   data={chunkedFilteredContentData}
@@ -734,6 +782,14 @@ export default function HomeScreen() {
               {isLoadingCategoryContent ? (
                 <View className="h-[154px] w-full items-center justify-center">
                   <ActivityIndicator size="large" color="#6C4DFF" />
+                </View>
+              ) : categoryContentError ? (
+                <View className="px-[18px]">
+                  <SectionErrorState
+                    title="축제 정보를 불러올 수 없습니다"
+                    onRetry={() => fetchCategoryContentData()}
+                    height={200}
+                  />
                 </View>
               ) : (
                 <FlatList

@@ -17,6 +17,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import "react-native-reanimated";
 
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { logScreenView } from "@/utils/analytics";
 
@@ -148,112 +149,114 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView>
-      <ActionSheetProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <StatusBar style="light" />
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              backgroundColor: "#FFFFFF",
-            }}
+    <ErrorBoundary>
+      <GestureHandlerRootView>
+        <ActionSheetProvider>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
           >
+            <StatusBar style="light" />
             <View
               style={{
-                width: "100%",
-                maxWidth: 500,
                 flex: 1,
+                alignItems: "center",
+                backgroundColor: "#FFFFFF",
               }}
             >
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="survey/index"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="(tabs)"
-                  options={{ headerShown: false, gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="+not-found"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="my/withdrawal"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="my/terms/service_terms"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="my/terms/service_privacy"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="my/terms/service_location"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="search-keywords/index"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="search-results/index"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="detail/[id]"
-                  options={{
-                    headerShown: false,
-                    presentation: "card",
-                  }}
-                />
-                <Stack.Screen
-                  name="edit-profile/index"
-                  options={{
-                    headerShown: false,
-                    presentation: "card",
-                  }}
-                />
-                <Stack.Screen
-                  name="plan/index"
-                  options={{
-                    headerShown: false,
-                    presentation: "card",
-                  }}
-                />
-                <Stack.Screen
-                  name="like/index"
-                  options={{
-                    headerShown: false,
-                    presentation: "card",
-                  }}
-                />
-                <Stack.Screen
-                  name="terms/index"
-                  options={{
-                    headerShown: false,
-                    presentation: "card",
-                  }}
-                />
-                <Stack.Screen
-                  name="image-viewer/index"
-                  options={{
-                    headerShown: false,
-                    presentation: "card",
-                  }}
-                />
-              </Stack>
+              <View
+                style={{
+                  width: "100%",
+                  maxWidth: 500,
+                  flex: 1,
+                }}
+              >
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="survey/index"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false, gestureEnabled: false }}
+                  />
+                  <Stack.Screen
+                    name="+not-found"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="my/withdrawal"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="my/terms/service_terms"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="my/terms/service_privacy"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="my/terms/service_location"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="search-keywords/index"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="search-results/index"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="detail/[id]"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="edit-profile/index"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="plan/index"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="like/index"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="terms/index"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="image-viewer/index"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                </Stack>
+              </View>
             </View>
-          </View>
-        </ThemeProvider>
-      </ActionSheetProvider>
-    </GestureHandlerRootView>
+          </ThemeProvider>
+        </ActionSheetProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 
