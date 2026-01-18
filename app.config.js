@@ -16,7 +16,7 @@ export default {
     supportsTablet: true,
     usesAppleSignIn: true,
     bundleIdentifier: process.env.MYCODE_BUNDLE_IDENTIFIER,
-    buildNumber: "36",
+    buildNumber: "37",
     backgroundColor: "#6B51FB",
     googleServicesFile: "./GoogleService-Info.plist",
     config: {
