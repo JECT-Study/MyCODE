@@ -11,7 +11,8 @@
     "lint": "expo lint",
     "update-login-images": "node scripts/generate-login-images.mjs",
     "build": "npx expo export --platform web --output-dir dist",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "eas-build-pre-install": "./scripts/eas-build-pre-install.sh"
   },
   "dependencies": {
     "@animatereactnative/marquee": "^0.5.2",
