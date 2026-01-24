@@ -19,6 +19,7 @@ import "react-native-reanimated";
 
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { authActions, useHasHydrated } from "@/stores/useAuthStore";
 import { logScreenView } from "@/utils/analytics";
 
 // 전역 플래그로 초기 URL 처리 중복 방지
@@ -36,6 +37,7 @@ export default function RootLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const segments = useSegments();
+  const hasHydrated = useHasHydrated();
   const [loaded] = useFonts({
     Pretendard: require("pretendard/dist/public/static/Pretendard-Regular.otf"),
     "Pretendard-Bold": require("pretendard/dist/public/static/Pretendard-Bold.otf"),
@@ -67,12 +69,19 @@ export default function RootLayout() {
     checkInitialUrlAndSetTimer();
   }, []);
 
-  // 폰트 로딩과 최소 시간이 모두 완료되면 스플래시 숨기기
+  // 폰트 로딩, 최소 시간, hydration이 모두 완료되면 스플래시 숨기기
   useEffect(() => {
-    if (loaded && minTimeElapsed) {
+    if (loaded && minTimeElapsed && hasHydrated) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, minTimeElapsed]);
+  }, [loaded, minTimeElapsed, hasHydrated]);
+
+  // hydration 완료 후 토큰 유효성 확인
+  useEffect(() => {
+    if (hasHydrated) {
+      authActions.checkAuthStatus();
+    }
+  }, [hasHydrated]);
 
   // 화면 추적
   useEffect(() => {
@@ -143,8 +152,8 @@ export default function RootLayout() {
     }
   }, [router]);
 
-  if (!loaded || !minTimeElapsed) {
-    // 폰트 로딩이 완료되지 않았거나 최소 시간이 경과하지 않은 경우
+  if (!loaded || !minTimeElapsed || !hasHydrated) {
+    // 폰트 로딩, 최소 시간, hydration이 완료되지 않은 경우
     return null;
   }
 

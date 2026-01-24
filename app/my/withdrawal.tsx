@@ -21,9 +21,9 @@ import CommonModal from "@/components/ui/CommonModal";
 import CustomHeader from "@/components/ui/CustomHeader";
 import Separator from "@/components/ui/Separator";
 import { WithdrawUrl } from "@/constants/ApiUrls";
-import { reason } from "@/constants/WithDrawal";
+import { WITHDRAWAL_REASONS } from "@/constants/Withdrawal";
 import { authApi } from "@/features/axios/axiosInstance";
-import { handleLogout } from "@/utils/authUtils";
+import { authActions } from "@/stores/useAuthStore";
 
 export default function Withdrawal() {
   const [contentHeight, setContentHeight] = useState<number>(0);
@@ -79,7 +79,7 @@ export default function Withdrawal() {
       await authApi.delete(WithdrawUrl);
 
       // 토큰 및 사용자 정보 삭제
-      await handleLogout();
+      await authActions.logout();
 
       // 로그인 화면으로 이동
       router.replace("/");
@@ -132,14 +132,14 @@ export default function Withdrawal() {
             <Animated.View style={animatedStyle}>
               <View onLayout={onLayoutContent} className="bg-white pt-px">
                 <Separator color="#757575" />
-                {reason.map((item, index) => (
+                {WITHDRAWAL_REASONS.map((item, index) => (
                   <Pressable
                     key={item}
                     onPress={() => {
                       setSelected(item);
                       toggle();
                     }}
-                    className={`flex h-14 justify-center bg-white px-4 py-3 ${index !== reason.length - 1 ? "border-b-[1px] border-[#D9D9D9]" : ""}`}
+                    className={`flex h-14 justify-center bg-white px-4 py-3 ${index !== WITHDRAWAL_REASONS.length - 1 ? "border-b-[1px] border-[#D9D9D9]" : ""}`}
                   >
                     <Text className="text-base text-[#212121]">{item}</Text>
                   </Pressable>

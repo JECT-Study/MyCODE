@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { shareFeedTemplate } from "@react-native-kakao/share";
@@ -43,7 +43,7 @@ import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
-import { checkAuthStatus } from "@/utils/authUtils";
+import { useIsLoggedIn } from "@/stores/useAuthStore";
 import { ensureMinLoadingTime } from "@/utils/loadingUtils";
 
 const IMAGE_HEIGHT = 350;
@@ -191,7 +191,6 @@ export default function DetailScreen() {
   const [isLiked, setIsLiked] = useState<boolean>(false); // 찜 상태
   const [likeCount, setLikeCount] = useState<number | null>(null); // 좋아요 개수 (null이면 contentData.likes 사용)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // 로그인 상태
   const [showToast, setShowToast] = useState<boolean>(false);
   const [showCopyToast, setShowCopyToast] = useState<boolean>(false);
   const [showLikeToast, setShowLikeToast] = useState<boolean>(false);
@@ -207,21 +206,13 @@ export default function DetailScreen() {
   const insets = useSafeAreaInsets();
   const { showActionSheetWithOptions } = useActionSheet();
 
+  const isLoggedIn = useIsLoggedIn();
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
     };
   });
-
-  // 토큰 확인을 통한 로그인 상태 체크 코드
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const isAuthenticated = await checkAuthStatus();
-      setIsLoggedIn(isAuthenticated);
-    };
-
-    verifyAuth();
-  }, []);
 
   useEffect(() => {
     const fetchContentDetail = async () => {
@@ -251,13 +242,9 @@ export default function DetailScreen() {
     fetchContentDetail();
   }, [id]);
 
-  const showHeaderBackground = scrollY > 300;
+  const showHeaderBackground = useMemo(() => scrollY > 300, [scrollY]);
 
-  // const handleKakaoShare = () => {
-  //   setShowShareModal(true);
-  // };
-
-  const handleKakaoShare = async () => {
+  const handleKakaoShare = useCallback(async () => {
     if (!contentData) return;
 
     try {
@@ -300,28 +287,31 @@ export default function DetailScreen() {
       // 사용자에게 오류 메시지 표시
       Alert.alert("공유 실패", "카카오톡 공유 중 오류가 발생했습니다.");
     }
-  };
+  }, [contentData, id]);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     router.back();
-  };
+  }, [router]);
 
-  const handleCopyAddress = async () => {
+  const handleCopyAddress = useCallback(async () => {
+    if (!contentData?.address) return;
     try {
-      await Clipboard.setStringAsync(contentData!.address);
+      await Clipboard.setStringAsync(contentData.address);
       setShowCopyToast(true);
     } catch (error) {
       console.error("복사 오류:", error);
     }
-  };
+  }, [contentData?.address]);
 
-  const handleScroll = (event: any) => {
+  const handleScroll = (event: {
+    nativeEvent: { contentOffset: { y: number } };
+  }) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
     setScrollY(currentScrollY);
   };
 
   // 찜하기 버튼 클릭 시 찜하기 상태 변경 함수
-  const handleLikeToggle = async () => {
+  const handleLikeToggle = useCallback(async () => {
     if (!id || isLikeLoading || !contentData) return;
 
     setIsLikeLoading(true);
@@ -351,7 +341,7 @@ export default function DetailScreen() {
         // 좋아요 추가 시: result = { likeId: number, likeCount: number }
         // 좋아요 취소 시: result = number (likeCount)
         const isAddAction = !currentIsLiked;
-        const likeCount = isAddAction ? result.likeCount : result;
+        const newLikeCount = isAddAction ? result.likeCount : result;
         const likeId = isAddAction ? result.likeId : null;
 
         // 애니메이션 실행 (찜하기 추가할 때만)
@@ -364,7 +354,7 @@ export default function DetailScreen() {
 
         // UI 상태 업데이트
         setIsLiked(!currentIsLiked);
-        setLikeCount(likeCount); // API 응답의 likeCount 사용
+        setLikeCount(newLikeCount); // API 응답의 likeCount 사용
         setContentData((prev) =>
           prev
             ? {
@@ -385,27 +375,30 @@ export default function DetailScreen() {
     } finally {
       setIsLikeLoading(false);
     }
-  };
+  }, [id, isLikeLoading, contentData, isLiked, scale]);
 
-  const handleImagePress = (index: number) => {
-    if (!contentData?.images || contentData.images.length === 0) return;
+  const handleImagePress = useCallback(
+    (index: number) => {
+      if (!contentData?.images || contentData.images.length === 0) return;
 
-    router.push({
-      pathname: "/image-viewer",
-      params: {
-        initialIndex: index.toString(),
-        images: JSON.stringify(contentData.images),
-      },
-    });
-  };
+      router.push({
+        pathname: "/image-viewer",
+        params: {
+          initialIndex: index.toString(),
+          images: JSON.stringify(contentData.images),
+        },
+      });
+    },
+    [router, contentData?.images],
+  );
 
-  const handleAddToSchedule = () => {
+  const handleAddToSchedule = useCallback(() => {
     if (!isLoggedIn) {
       setShowLoginModal(true);
     } else if (contentData?.scheduleId === null) {
       setIsDatePickerOpen(true);
     }
-  };
+  }, [isLoggedIn, contentData?.scheduleId]);
 
   const handleDatePickerClose = () => {
     setIsDatePickerOpen(false);
@@ -434,7 +427,7 @@ export default function DetailScreen() {
     setShowLikeToast(false);
   };
 
-  const openAppleMaps = async () => {
+  const openAppleMaps = useCallback(async () => {
     if (!contentData) return;
     const { latitude, longitude, placeName } = contentData;
     const appleMapsUrl = `maps://?q=${encodeURIComponent(placeName)}&ll=${latitude},${longitude}`;
@@ -451,9 +444,9 @@ export default function DetailScreen() {
     } catch (error) {
       console.error("Apple Maps 연동 중 오류 발생:", error);
     }
-  };
+  }, [contentData]);
 
-  const openNaverMap = async () => {
+  const openNaverMap = useCallback(async () => {
     if (!contentData) return;
     const { latitude, longitude, placeName } = contentData;
     const naverMapScheme = `nmap://place?lat=${latitude}&lng=${longitude}&name=${encodeURIComponent(placeName)}&appname=${process.env.MYCODE_BUNDLE_IDENTIFIER}`;
@@ -473,9 +466,9 @@ export default function DetailScreen() {
     } catch (error) {
       console.error("네이버 지도 연동 중 오류 발생:", error);
     }
-  };
+  }, [contentData]);
 
-  const handleNaverMapPress = () => {
+  const handleNaverMapPress = useCallback(() => {
     if (!contentData) return;
 
     if (Platform.OS === "ios") {
@@ -502,7 +495,7 @@ export default function DetailScreen() {
       // Android: 네이버 지도만 사용
       openNaverMap();
     }
-  };
+  }, [contentData, showActionSheetWithOptions, openAppleMaps, openNaverMap]);
 
   return (
     <>

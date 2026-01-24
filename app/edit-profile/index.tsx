@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { Pressable, SafeAreaView, Text, TextInput, View } from "react-native";
 
 import CameraIcon from "@/components/icons/CameraIcon";
@@ -15,16 +14,20 @@ import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import useCustomImagePicker from "@/hooks/useCustomImagePicker";
 import {
+  authActions,
+  useNickname,
+  useProfileImage,
+} from "@/stores/useAuthStore";
+import {
   useCancelEditProfile,
   useTempImageUri,
 } from "@/stores/useEditProfileStore";
-import { useSetNickname, useSetProfileImage } from "@/stores/useUserStore";
-import { loadUserInfo } from "@/utils/authUtils";
 
 export default function EditProfile() {
   const cancelEdit = useCancelEditProfile();
-  const setGlobalNickname = useSetNickname();
-  const setGlobalProfileImage = useSetProfileImage();
+
+  const currentNickname = useNickname();
+  const currentProfileImage = useProfileImage();
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState(false);
@@ -45,24 +48,13 @@ export default function EditProfile() {
 
   // 닉네임 관련 - 직접 상태 관리
   const [inputNickname, setInputNickname] = useState("");
-  const [currentProfileImage, setCurrentProfileImage] = useState("");
 
-  // 페이지 진입 시 SecureStore에서 사용자 정보 로드
+  // 스토어에서 초기값 설정
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      const { nickname, profileImage } = await loadUserInfo();
-
-      if (nickname) {
-        setInputNickname(nickname);
-      }
-
-      if (profileImage) {
-        setCurrentProfileImage(profileImage);
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+    if (currentNickname) {
+      setInputNickname(currentNickname);
+    }
+  }, [currentNickname]);
 
   // 프로필 업데이트 API 요청
   const handleUpdateProfile = async () => {
@@ -107,12 +99,12 @@ export default function EditProfile() {
           mimeType = "image/webp";
         }
 
-        // React Native에서 FormData에 파일 추가하는 방식 (블로그 참고)
+        // React Native에서 FormData에 파일 추가하는 방식
         const imageFile = {
           uri: imageUri,
           type: mimeType,
           name: filename,
-        } as any;
+        } as unknown as Blob;
 
         // 이미지를 FormData에 추가
         formData.append("image", imageFile);
@@ -129,25 +121,15 @@ export default function EditProfile() {
       );
 
       if (response.data.isSuccess) {
-        // 전역 상태 업데이트
-        setGlobalNickname(inputNickname.trim());
+        // 스토어 상태 업데이트 (자동으로 AsyncStorage에 persist)
+        authActions.setNickname(inputNickname.trim());
 
-        // SecureStore에도 닉네임 업데이트
-        await SecureStore.setItemAsync("nickname", inputNickname.trim());
-
-        // 이미지가 업데이트된 경우 전역 상태에도 반영
+        // 이미지가 업데이트된 경우 스토어에도 반영
         if (hasNewImage && response.data.result?.profileImage) {
-          setGlobalProfileImage(response.data.result.profileImage);
-          // SecureStore에도 프로필 이미지 업데이트
-          await SecureStore.setItemAsync(
-            "profileImage",
-            response.data.result.profileImage,
-          );
+          authActions.setProfileImage(response.data.result.profileImage);
         } else if (hasNewImage && profileUri) {
           // 서버에서 이미지 URL을 반환하지 않는 경우, 로컬 URI 사용
-          setGlobalProfileImage(profileUri);
-          // SecureStore에도 프로필 이미지 업데이트
-          await SecureStore.setItemAsync("profileImage", profileUri);
+          authActions.setProfileImage(profileUri);
         }
 
         setModalTitle("성공");
@@ -228,7 +210,7 @@ export default function EditProfile() {
           {imageSource ? (
             <Image
               source={imageSource}
-              style={{ width: 100, height: 100, borderRadius: "100%" }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
             />
           ) : (
             <DefaultProfileIcon size={100} />

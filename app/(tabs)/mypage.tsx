@@ -1,10 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { AxiosError } from "axios";
 import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import { setStatusBarStyle } from "expo-status-bar";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
 import DefaultProfileIcon from "@/components/icons/DefaultProfileIcon";
@@ -15,23 +15,20 @@ import CommonModal from "@/components/ui/CommonModal";
 import Separator from "@/components/ui/Separator";
 import { authApi } from "@/features/axios/axiosInstance";
 import { RESPONSE_CODES } from "@/features/axios/responseCodes";
-import useUserStore, {
+import {
+  authActions,
   useIsLoggedIn,
   useNickname,
   useProfileImage,
-} from "@/stores/useUserStore";
-import { checkAuthStatus, handleLogout, loadUserInfo } from "@/utils/authUtils";
+} from "@/stores/useAuthStore";
 
 export default function MyScreen() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showLogoutAlert, setShowLogoutAlert] = useState<boolean>(false);
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   const [statusModalMessage, setStatusModalMessage] = useState<string>("");
   const [showLoginPromptModal, setShowLoginPromptModal] =
     useState<boolean>(false);
   const [loginPromptMessage, setLoginPromptMessage] = useState<string>("");
-
-  const isFirstLoad = useRef<boolean>(true);
 
   const isLoggedIn = useIsLoggedIn();
   const nickname = useNickname();
@@ -45,50 +42,6 @@ export default function MyScreen() {
       setShowStatusModal(false);
       setShowLogoutAlert(false);
       setShowLoginPromptModal(false);
-
-      // SecureStore의 토큰을 확인하고 로그인 상태 동기화
-      const syncLoginStatus = async () => {
-        try {
-          // 첫 로드일 때만 로딩 스피너 표시
-          if (isFirstLoad.current) {
-            setIsLoading(true);
-          }
-
-          const isAuthenticated = await checkAuthStatus();
-          const { setLoggedIn } = useUserStore.getState().action;
-
-          if (isAuthenticated) {
-            setLoggedIn(true);
-
-            // nickname과 profileImage도 SecureStore에서 불러와서 Store에 설정
-            const {
-              nickname: storedNickname,
-              profileImage: storedProfileImage,
-            } = await loadUserInfo();
-
-            const { setNickname, setProfileImage } =
-              useUserStore.getState().action;
-
-            if (storedNickname) {
-              setNickname(storedNickname);
-            }
-            if (storedProfileImage) {
-              setProfileImage(storedProfileImage);
-            }
-          } else {
-            setLoggedIn(false);
-          }
-        } catch (error) {
-          console.error("토큰 확인 중 에러:", error);
-        } finally {
-          if (isFirstLoad.current) {
-            setIsLoading(false);
-            isFirstLoad.current = false;
-          }
-        }
-      };
-
-      syncLoginStatus();
     }, []),
   );
 
@@ -100,7 +53,7 @@ export default function MyScreen() {
       const logoutResponse = await authApi.post("/auth/logout");
 
       if (logoutResponse.data.code === RESPONSE_CODES.LOGOUT_SUCCESS) {
-        await handleLogout();
+        await authActions.logout();
 
         setShowLogoutAlert(false);
         setStatusModalMessage("로그아웃이 완료되었습니다.");
@@ -300,13 +253,6 @@ export default function MyScreen() {
           </Pressable>
         )}
       </View>
-
-      {/* 로딩 스피너 */}
-      {isLoading && (
-        <View className="absolute bottom-0 left-0 right-0 top-0 items-center justify-center bg-white">
-          <ActivityIndicator size="large" color="#6C4DFF" />
-        </View>
-      )}
 
       {/* 로그아웃 확인 모달 */}
       <CommonModal

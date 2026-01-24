@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
@@ -34,8 +34,12 @@ import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
-import useUserStore from "@/stores/useUserStore";
-import { checkAuthStatus, loadUserInfo } from "@/utils/authUtils";
+import {
+  authActions,
+  useIsLoggedIn,
+  useNickname,
+  useUserRegions,
+} from "@/stores/useAuthStore";
 import { mapUserRegionNameToKey } from "@/utils/searchUtils";
 
 // dayjs 한국어 로케일 설정
@@ -142,8 +146,9 @@ export default function HomeScreen() {
   const [categoryContentError, setCategoryContentError] =
     useState<boolean>(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const { nickname, userRegions } = useUserStore();
+  const isLoggedIn = useIsLoggedIn();
+  const nickname = useNickname();
+  const userRegions = useUserRegions();
 
   const router = useRouter();
   const navigation = useNavigation();
@@ -174,40 +179,21 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      // StatusBar 스타일을 light로 설정
       setStatusBarStyle("light");
-
-      const syncLoginStatus = async () => {
-        const isAuthenticated = await checkAuthStatus();
-
-        if (isAuthenticated) {
-          setIsLoggedIn(true);
-
-          // nickname과 userRegions를 SecureStore에서 불러와서 Store에 설정
-          const { nickname, userRegions } = await loadUserInfo();
-
-          const { setNickname, setUserRegions } =
-            useUserStore.getState().action;
-
-          if (nickname) {
-            setNickname(nickname);
-          }
-          if (userRegions.length > 0) {
-            setUserRegions(userRegions);
-          }
-        } else {
-          setIsLoggedIn(false);
-        }
-      };
-
-      syncLoginStatus();
+      authActions.checkAuthStatus();
     }, []),
   );
 
-  const weekDays = getWeekDays();
+  const weekDays = useMemo(() => getWeekDays(), []);
 
-  const chunkedRecommendationsData = chunkArray(recommendationsData, 3);
-  const chunkedFilteredContentData = chunkArray(weekDayData, 3);
+  const chunkedRecommendationsData = useMemo(
+    () => chunkArray(recommendationsData, 3),
+    [recommendationsData],
+  );
+  const chunkedFilteredContentData = useMemo(
+    () => chunkArray(weekDayData, 3),
+    [weekDayData],
+  );
 
   const fetchRecommendationsByCategory = useCallback(
     async (category: CategoryType, skipLoading = false) => {

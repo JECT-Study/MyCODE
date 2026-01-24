@@ -21,8 +21,8 @@ import MyCodeLogo from "@/components/icons/MyCodeLogo";
 import { loginImages, LoginImageType } from "@/constants/LoginImages";
 import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
 import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
+import { authActions } from "@/stores/useAuthStore";
 import { logEvent } from "@/utils/analytics";
-import { checkAuthStatus } from "@/utils/authUtils";
 
 function LoginMarquee({
   imageList,
@@ -133,7 +133,7 @@ export default function Login() {
       const checkTokens = async () => {
         setStatusBarStyle("light");
 
-        const isAuthenticated = await checkAuthStatus();
+        const isAuthenticated = await authActions.checkAuthStatus();
 
         if (isAuthenticated) {
           setIsLoggedIn(true);

@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { useFunnel } from "@use-funnel/react-navigation-native";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SurveyBalloon from "@/components/survey/SurveyBalloon";
@@ -10,7 +9,7 @@ import SurveyStep from "@/components/survey/SurveyStep";
 import CommonModal from "@/components/ui/CommonModal";
 import { options, questions } from "@/constants/Surveys";
 import { authApi } from "@/features/axios/axiosInstance";
-import useUserStore from "@/stores/useUserStore";
+import { authActions } from "@/stores/useAuthStore";
 import { logEvent } from "@/utils/analytics";
 
 interface SurveyResult {
@@ -96,13 +95,8 @@ export default function SurveyScreen() {
       const response = await authApi.post("/trait-test", requestBody);
 
       if (response.data.isSuccess) {
-        // 설문 제출 성공 시 userRegions 업데이트 (id와 name 포함)
-        await SecureStore.setItemAsync(
-          "userRegions",
-          JSON.stringify(userRegionsWithId),
-        );
-        const { setUserRegions } = useUserStore.getState().action;
-        setUserRegions(userRegionsWithId);
+        // 설문 제출 성공 시 userRegions 업데이트 (자동으로 AsyncStorage에 persist)
+        authActions.setUserRegions(userRegionsWithId);
 
         history.push("done", newContext);
       } else {

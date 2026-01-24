@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { GestureResponderEvent, Pressable, Text, View } from "react-native";
 
 import HeartFilledIcon from "@/components/icons/HeartFilledIcon";
 import HeartOutlineIcon from "@/components/icons/HeartOutlineIcon";
@@ -9,8 +9,8 @@ import ContentImage from "@/components/ui/ContentImage";
 import Separator from "@/components/ui/Separator";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { useIsLoggedIn } from "@/stores/useAuthStore";
 import { formatAddress } from "@/utils/addressUtils";
-import { checkAuthStatus } from "@/utils/authUtils";
 
 interface infoInterface {
   contentId: number;
@@ -33,26 +33,17 @@ interface FavoriteContentItemProps {
   showSeparator?: boolean;
 }
 
-export default function FavoriteContentItem({
+function FavoriteContentItem({
   info,
   onLikeChange,
   showSeparator = true,
 }: FavoriteContentItemProps) {
   const [isLikeLoading, setIsLikeLoading] = useState<boolean>(false);
   const [isLiked, setIsLiked] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  const isLoggedIn = useIsLoggedIn();
 
   const router = useRouter();
-
-  // 토큰 확인을 통한 로그인 상태 체크
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const isAuthenticated = await checkAuthStatus();
-      setIsLoggedIn(isAuthenticated);
-    };
-
-    verifyAuth();
-  }, []);
 
   // 초기 좋아요 상태 설정
   useEffect(() => {
@@ -62,52 +53,55 @@ export default function FavoriteContentItem({
   }, [info]);
 
   // 상세 페이지로 이동
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     router.push(`/detail/${info.contentId}`);
-  };
+  }, [router, info.contentId]);
 
   // 좋아요 토글 함수
-  const handleLikeToggle = async (e: any) => {
-    // 이벤트 전파 중지 (아이템 클릭 이벤트가 발생하지 않도록)
-    e.stopPropagation();
+  const handleLikeToggle = useCallback(
+    async (e: GestureResponderEvent) => {
+      // 이벤트 전파 중지 (아이템 클릭 이벤트가 발생하지 않도록)
+      e.stopPropagation();
 
-    if (!info.contentId || isLikeLoading || !isLoggedIn) return;
+      if (!info.contentId || isLikeLoading || !isLoggedIn) return;
 
-    setIsLikeLoading(true);
+      setIsLikeLoading(true);
 
-    // 현재 좋아요 상태를 미리 저장
-    const currentIsLiked = isLiked;
+      // 현재 좋아요 상태를 미리 저장
+      const currentIsLiked = isLiked;
 
-    try {
-      let response;
+      try {
+        let response;
 
-      if (!currentIsLiked) {
-        // 좋아요 추가
-        response = await authApi.post(
-          `${BACKEND_URL}/contents/${info.contentId}/favorites`,
-        );
-      } else {
-        // 좋아요 취소
-        response = await authApi.delete(
-          `${BACKEND_URL}/contents/${info.contentId}/favorites`,
-        );
-      }
-
-      if (response.data.isSuccess) {
-        // UI 상태 업데이트
-        setIsLiked(!currentIsLiked);
-
-        // 부모 컴포넌트에 변경사항 알리기
-        if (onLikeChange) {
-          onLikeChange(info.contentId, !currentIsLiked, 0);
+        if (!currentIsLiked) {
+          // 좋아요 추가
+          response = await authApi.post(
+            `${BACKEND_URL}/contents/${info.contentId}/favorites`,
+          );
+        } else {
+          // 좋아요 취소
+          response = await authApi.delete(
+            `${BACKEND_URL}/contents/${info.contentId}/favorites`,
+          );
         }
+
+        if (response.data.isSuccess) {
+          // UI 상태 업데이트
+          setIsLiked(!currentIsLiked);
+
+          // 부모 컴포넌트에 변경사항 알리기
+          if (onLikeChange) {
+            onLikeChange(info.contentId, !currentIsLiked, 0);
+          }
+        }
+      } catch (error) {
+        console.error("좋아요 오류:", error);
+      } finally {
+        setIsLikeLoading(false);
       }
-    } catch (error) {
-      console.error("좋아요 오류:", error);
-    } finally {
-      setIsLikeLoading(false);
-    }
-  };
+    },
+    [info.contentId, isLikeLoading, isLoggedIn, isLiked, onLikeChange],
+  );
 
   return (
     <>
@@ -168,3 +162,5 @@ export default function FavoriteContentItem({
     </>
   );
 }
+
+export default memo(FavoriteContentItem);
