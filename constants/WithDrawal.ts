@@ -1,7 +1,10 @@
-export const reason = [
+/**
+ * 회원 탈퇴 사유 목록
+ */
+export const WITHDRAWAL_REASONS = [
   "서비스 사용 빈도가 낮아요.",
   "원하는 기능이 부족해요.",
   "더 이상 서비스를 이용하지 않아요.",
   "새로운 계정으로 가입하고 싶어요.",
   "기타",
-];
+] as const;

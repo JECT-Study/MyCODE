@@ -44,27 +44,27 @@ export const formatRelativeDate = (dateString: string): string => {
   return date.format("M월 D일");
 };
 
+const DAY_OF_WEEK = [
+  "일요일",
+  "월요일",
+  "화요일",
+  "수요일",
+  "목요일",
+  "금요일",
+  "토요일",
+] as const;
+
 /**
  * 요일 포함 날짜 포맷팅
  * @param date - 날짜 문자열
  * @returns 요일이 포함된 날짜 문자열
  */
 export const formatDateWithDay = (date: string): string => {
-  const dayOfWeek = [
-    "일요일",
-    "월요일",
-    "화요일",
-    "수요일",
-    "목요일",
-    "금요일",
-    "토요일",
-  ];
-
   const selectedDay = dayjs(date);
   const today = dayjs();
   const isToday = selectedDay.isSame(today, "day");
 
-  const dayName = dayOfWeek[selectedDay.day()];
+  const dayName = DAY_OF_WEEK[selectedDay.day()];
   const dateText = `${selectedDay.date()}일 ${dayName}`;
   return isToday ? `${dateText} (오늘)` : dateText;
 };

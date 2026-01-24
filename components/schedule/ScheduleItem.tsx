@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 
 import { Pressable, Text, View } from "react-native";
 
@@ -14,15 +14,23 @@ interface ScheduleItemProps {
   showMenuButton?: boolean;
 }
 
-export default function ScheduleItem({
+function ScheduleItem({
   item,
   onPress,
   onMenuPress,
   showMenuButton = false,
 }: ScheduleItemProps) {
+  const handlePress = useCallback(() => {
+    onPress?.(item.contentId);
+  }, [onPress, item.contentId]);
+
+  const handleMenuPress = useCallback(() => {
+    onMenuPress?.(item.contentId);
+  }, [onMenuPress, item.contentId]);
+
   return (
     <Pressable
-      onPress={() => onPress?.(item.contentId)}
+      onPress={handlePress}
       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
     >
       <View className="flex-row gap-x-[18px]">
@@ -40,7 +48,7 @@ export default function ScheduleItem({
             </View>
             {showMenuButton && (
               <Pressable
-                onPress={() => onMenuPress?.(item.contentId)}
+                onPress={handleMenuPress}
                 className="px-3.5 py-1"
                 hitSlop={8}
               >
@@ -59,3 +67,5 @@ export default function ScheduleItem({
     </Pressable>
   );
 }
+
+export default memo(ScheduleItem);

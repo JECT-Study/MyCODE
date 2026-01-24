@@ -1,25 +1,22 @@
-// 검색 관련 공통 유틸 함수
-
-// 지역 코드를 한글 이름으로 변환하는 함수
-export const getRegionKeyword = (regionKey: string): string => {
-  const regionMap: { [key: string]: string } = {
-    ALL: "",
-    SEOUL: "서울",
-    GYEONGGI_INCHEON: "경기",
-    GANGWON: "강원",
-    CHUNGCHEONG: "충청",
-    CHUNGNAM: "충남",
-    DAEGU_GYEONGBUK: "대구",
-    GYEONGNAM_ULSAN: "경남",
-    GWANGJU_JEONNAM: "광주",
-    JEONBUK: "전북",
-    BUSAN: "부산",
-    JEJU: "제주",
-  };
-  return regionMap[regionKey] || "";
+const REGION_KEYWORD: Record<string, string> = {
+  ALL: "",
+  SEOUL: "서울",
+  GYEONGGI_INCHEON: "경기",
+  GANGWON: "강원",
+  CHUNGCHEONG: "충청",
+  CHUNGNAM: "충남",
+  DAEGU_GYEONGBUK: "대구",
+  GYEONGNAM_ULSAN: "경남",
+  GWANGJU_JEONNAM: "광주",
+  JEONBUK: "전북",
+  BUSAN: "부산",
+  JEJU: "제주",
 };
 
-// 카테고리 키를 한글 라벨로 변환하는 함수
+export const getRegionKeyword = (regionKey: string): string => {
+  return REGION_KEYWORD[regionKey] ?? "";
+};
+
 export const getCategoryLabel = (category: string): string => {
   switch (category) {
     case "PERFORMANCE":
@@ -36,7 +33,6 @@ export const getCategoryLabel = (category: string): string => {
   }
 };
 
-// 지역 키를 한글 라벨로 변환하는 함수
 export const getRegionLabel = (region: string): string => {
   switch (region) {
     case "SEOUL":
@@ -67,20 +63,20 @@ export const getRegionLabel = (region: string): string => {
   }
 };
 
-// userRegions의 name을 RegionBottomSheet의 key로 변환하는 함수
+const REGION_NAME_TO_KEY: Record<string, string> = {
+  서울: "SEOUL",
+  "경기·인천": "GYEONGGI_INCHEON",
+  강원: "GANGWON",
+  "충청권(충북·대전·세종)": "CHUNGCHEONG",
+  충남: "CHUNGNAM",
+  "대구·경북": "DAEGU_GYEONGBUK",
+  "경남·울산": "GYEONGNAM_ULSAN",
+  "광주·전남": "GWANGJU_JEONNAM",
+  전북: "JEONBUK",
+  부산: "BUSAN",
+  제주: "JEJU",
+};
+
 export const mapUserRegionNameToKey = (regionName: string): string => {
-  const nameToKeyMap: { [key: string]: string } = {
-    서울: "SEOUL",
-    "경기·인천": "GYEONGGI_INCHEON",
-    강원: "GANGWON",
-    "충청권(충북·대전·세종)": "CHUNGCHEONG",
-    충남: "CHUNGNAM",
-    "대구·경북": "DAEGU_GYEONGBUK",
-    "경남·울산": "GYEONGNAM_ULSAN",
-    "광주·전남": "GWANGJU_JEONNAM",
-    전북: "JEONBUK",
-    부산: "BUSAN",
-    제주: "JEJU",
-  };
-  return nameToKeyMap[regionName] || "ALL";
+  return REGION_NAME_TO_KEY[regionName] ?? "ALL";
 };

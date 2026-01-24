@@ -1,3 +1,5 @@
+import { memo, useCallback } from "react";
+
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
@@ -14,10 +16,14 @@ interface CategoryContentItem {
   endDate: string;
 }
 
-export default function MoreCard({ item }: { item: CategoryContentItem }) {
+function MoreCard({ item }: { item: CategoryContentItem }) {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
+  const handlePress = useCallback(() => {
+    router.push(`/detail/${item.contentId}`);
+  }, [router, item.contentId]);
+
+  console.log(item);
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
@@ -46,3 +52,5 @@ export default function MoreCard({ item }: { item: CategoryContentItem }) {
     </Pressable>
   );
 }
+
+export default memo(MoreCard);

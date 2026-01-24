@@ -1,3 +1,5 @@
+import { memo, useCallback } from "react";
+
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
@@ -14,10 +16,12 @@ interface WeeklyContentItem {
   endDate: string;
 }
 
-export default function WeeklyCard({ item }: { item: WeeklyContentItem }) {
+function WeeklyCard({ item }: { item: WeeklyContentItem }) {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
+  const handlePress = useCallback(() => {
+    router.push(`/detail/${item.contentId}`);
+  }, [router, item.contentId]);
 
   return (
     <Pressable className="flex-row" onPress={handlePress}>
@@ -43,3 +47,5 @@ export default function WeeklyCard({ item }: { item: WeeklyContentItem }) {
     </Pressable>
   );
 }
+
+export default memo(WeeklyCard);

@@ -1,3 +1,5 @@
+import { memo, useCallback } from "react";
+
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
@@ -16,25 +18,26 @@ interface CustomContentItem {
   endDate: string;
 }
 
-const categoryConfig = [
-  { id: "PERFORMANCE", iconType: "performance", label: "공연" },
-  { id: "EXHIBITION", iconType: "exhibition", label: "전시" },
-  { id: "FESTIVAL", iconType: "festival", label: "축제" },
-  { id: "EVENT", iconType: "event", label: "행사" },
+const CATEGORY_CONFIG = [
+  { id: "PERFORMANCE", label: "공연" },
+  { id: "EXHIBITION", label: "전시" },
+  { id: "FESTIVAL", label: "축제" },
+  { id: "EVENT", label: "행사" },
 ] as const;
 
-export default function HotCard({ item }: { item: CustomContentItem }) {
+const getContentTypeLabel = (contentType: string): string => {
+  const categoryItem = CATEGORY_CONFIG.find(
+    (config) => config.id === contentType,
+  );
+  return categoryItem ? categoryItem.label : "기타";
+};
+
+function HotCard({ item }: { item: CustomContentItem }) {
   const router = useRouter();
 
-  const handlePress = () => router.push(`/detail/${item.contentId}`);
-
-  // contentType에 따른 라벨 매핑
-  const getContentTypeLabel = (contentType: string) => {
-    const categoryItem = categoryConfig.find(
-      (config) => config.id === contentType,
-    );
-    return categoryItem ? categoryItem.label : "기타";
-  };
+  const handlePress = useCallback(() => {
+    router.push(`/detail/${item.contentId}`);
+  }, [router, item.contentId]);
 
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
@@ -62,3 +65,5 @@ export default function HotCard({ item }: { item: CustomContentItem }) {
     </Pressable>
   );
 }
+
+export default memo(HotCard);
