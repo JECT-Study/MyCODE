@@ -51,4 +51,11 @@ GoogleService-Info.plist
 .vscode
 .idea
 
+# AI agent skills
+.agents/
+.cursor/
+
+# docs
+docs/
+
 app-example
