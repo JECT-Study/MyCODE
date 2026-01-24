@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { AxiosError } from "axios";
-import { router, useFocusEffect } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
+import { router } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -20,6 +19,7 @@ import Toast from "@/components/ui/Toast";
 import { UsersFavoriteUrl } from "@/constants/ApiUrls";
 import { categoryUnion, filterData } from "@/constants/Filter";
 import { authApi } from "@/features/axios/axiosInstance";
+import { useStatusBar } from "@/hooks/useStatusBar";
 
 // 좋아요 아이템 타입 정의
 interface FavoriteItem {
@@ -110,12 +110,7 @@ export default function Like() {
     }
   }, [fetchLikes]);
 
-  // 상태바 스타일 설정
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle("dark");
-    }, []),
-  );
+  useStatusBar("dark");
 
   // 카테고리 변경 시 데이터 새로고침
   useEffect(() => {

@@ -4,7 +4,6 @@ import { Marquee } from "@animatereactnative/marquee";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import {
   AppState,
   AppStateStatus,
@@ -21,6 +20,7 @@ import MyCodeLogo from "@/components/icons/MyCodeLogo";
 import { loginImages, LoginImageType } from "@/constants/LoginImages";
 import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
 import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import { authActions } from "@/stores/useAuthStore";
 import { logEvent } from "@/utils/analytics";
 
@@ -128,11 +128,11 @@ export default function Login() {
   const insets = useSafeAreaInsets();
   const isIOS = Platform.OS === "ios";
 
+  useStatusBar("light");
+
   useFocusEffect(
     useCallback(() => {
       const checkTokens = async () => {
-        setStatusBarStyle("light");
-
         const isAuthenticated = await authActions.checkAuthStatus();
 
         if (isAuthenticated) {

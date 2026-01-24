@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -16,6 +15,7 @@ import Animated, {
 
 import Confetti from "@/components/survey/Confetti";
 import CustomHeader from "@/components/ui/CustomHeader";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import { logEvent } from "@/utils/analytics";
 
 interface Props {
@@ -37,11 +37,10 @@ export default function SurveyBalloon({ type, onNext }: Props) {
   const buttonOpacity = useSharedValue(0);
   const buttonTranslateY = useSharedValue(20);
 
+  useStatusBar("dark");
+
   useFocusEffect(
     useCallback(() => {
-      // StatusBar 스타일을 dark로 설정
-      setStatusBarStyle("dark");
-
       // INTRO 화면일 때만 survey_intro_view 이벤트 기록
       if (type === "INTRO") {
         logEvent("survey_intro_view");

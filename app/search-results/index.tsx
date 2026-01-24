@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -26,6 +24,7 @@ import CommonModal from "@/components/ui/CommonModal";
 import Divider from "@/components/ui/Divider";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import {
   CategorySearchResponse,
   EventCardProps,
@@ -128,12 +127,7 @@ export default function SearchResults() {
   const [showEmptyKeywordModal, setShowEmptyKeywordModal] =
     useState<boolean>(false);
 
-  // 탭 포커스 시 StatusBar 스타일 설정
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle("dark");
-    }, []),
-  );
+  useStatusBar("dark");
 
   // 기본 검색 함수 (둘 다 ALL일 때)
   const searchDefault = useCallback(

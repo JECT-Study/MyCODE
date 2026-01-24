@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import {
   Platform,
   Pressable,
@@ -18,6 +17,7 @@ import CloseIcon from "@/components/icons/CloseIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import { RecentSearchResponse } from "@/types/search";
 
 export default function SearchKeywords() {
@@ -28,10 +28,10 @@ export default function SearchKeywords() {
   // URL 파라미터에서 카테고리와 지역 값 받기
   const { category = "ALL", region = "" } = useLocalSearchParams();
 
-  // 탭 포커스 시 StatusBar 스타일 설정
+  useStatusBar("dark");
+
   useFocusEffect(
     useCallback(() => {
-      setStatusBarStyle("dark");
       fetchRecentSearches();
     }, []),
   );

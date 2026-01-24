@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import dayjs from "dayjs";
-import { router, useFocusEffect } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
+import { router } from "expo-router";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +17,7 @@ import Toast from "@/components/ui/Toast";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { authApi } from "@/features/axios/axiosInstance";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import { ScheduleApiResponse } from "@/types/schedule";
 import { formatRelativeDate } from "@/utils/dateUtils";
 
@@ -98,12 +98,7 @@ export default function Plan() {
     [],
   );
 
-  // 상태바 스타일 설정
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle("dark");
-    }, []),
-  );
+  useStatusBar("dark");
 
   // 초기 데이터 로딩
   useEffect(() => {

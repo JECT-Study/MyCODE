@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { CalendarProvider } from "react-native-calendars";
 
@@ -14,6 +12,8 @@ import EmptyState from "@/components/ui/EmptyState";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { ScheduleItemType } from "@/constants/ScheduleData";
 import { publicApi } from "@/features/axios/axiosInstance";
+import { useStatusBar } from "@/hooks/useStatusBar";
+import { useTabScrollReset } from "@/hooks/useTabScrollReset";
 import { ScheduleApiResponse } from "@/types/schedule";
 import { formatDateWithDay } from "@/utils/dateUtils";
 
@@ -31,38 +31,10 @@ export default function ScheduleScreen() {
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
 
   const router = useRouter();
-  const navigation = useNavigation();
   const flatListRef = useRef<FlatList>(null);
-  const isFocusedRef = useRef(false);
 
-  // 포커스 상태 추적
-  useFocusEffect(
-    useCallback(() => {
-      isFocusedRef.current = true;
-      return () => {
-        isFocusedRef.current = false;
-      };
-    }, []),
-  );
-
-  // 탭 재클릭 시 스크롤을 최상단으로 이동
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("tabPress" as any, () => {
-      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
-      if (isFocusedRef.current) {
-        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-      }
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  // 탭 포커스 시 StatusBar 스타일 설정
-  useFocusEffect(
-    useCallback(() => {
-      setStatusBarStyle("dark");
-    }, []),
-  );
+  useStatusBar("dark");
+  useTabScrollReset(flatListRef);
 
   // 스케줄 데이터 API 호출 함수
   const fetchScheduleData = useCallback(

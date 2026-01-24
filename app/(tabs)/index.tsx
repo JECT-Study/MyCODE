@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -33,7 +32,10 @@ import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
+import { DIMENSIONS } from "@/constants/Dimensions";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
+import { useStatusBar } from "@/hooks/useStatusBar";
+import { useTabScrollReset } from "@/hooks/useTabScrollReset";
 import {
   authActions,
   useIsLoggedIn,
@@ -84,8 +86,6 @@ const categoryConfig = [
   { id: "FESTIVAL", iconType: "festival", label: "축제" },
   { id: "EVENT", iconType: "event", label: "행사" },
 ] as const;
-
-const SCROLL_THRESHOLD = 20;
 
 const chunkArray = <T,>(array: T[], chunkSize: number): T[][] => {
   const chunks = [];
@@ -151,35 +151,13 @@ export default function HomeScreen() {
   const userRegions = useUserRegions();
 
   const router = useRouter();
-  const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
-  const isFocusedRef = useRef(false);
 
-  // 포커스 상태 추적
-  useFocusEffect(
-    useCallback(() => {
-      isFocusedRef.current = true;
-      return () => {
-        isFocusedRef.current = false;
-      };
-    }, []),
-  );
-
-  // 탭 재클릭 시 스크롤을 최상단으로 이동
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("tabPress" as any, () => {
-      // 이미 포커스된 상태에서 탭을 누르면 스크롤을 최상단으로
-      if (isFocusedRef.current) {
-        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-      }
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+  useStatusBar("light");
+  useTabScrollReset(scrollViewRef);
 
   useFocusEffect(
     useCallback(() => {
-      setStatusBarStyle("light");
       authActions.checkAuthStatus();
     }, []),
   );
@@ -367,7 +345,7 @@ export default function HomeScreen() {
     const currentScrollY = contentOffset.y;
 
     // 스크롤 헤더 표시 여부 결정 (SCROLL_THRESHOLD 이상 스크롤 시 헤더 표시)
-    setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
+    setIsScrolled(currentScrollY > DIMENSIONS.SCROLL_THRESHOLD);
   };
 
   // 검색 바 클릭 시 (region 선택 없이 이동)

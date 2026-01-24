@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 import { AxiosError } from "axios";
 import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
-import { setStatusBarStyle } from "expo-status-bar";
 import { Pressable, Text, View } from "react-native";
 
 import CalendarEditIcon from "@/components/icons/CalendarEditIcon";
@@ -15,6 +14,7 @@ import CommonModal from "@/components/ui/CommonModal";
 import Separator from "@/components/ui/Separator";
 import { authApi } from "@/features/axios/axiosInstance";
 import { RESPONSE_CODES } from "@/features/axios/responseCodes";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import {
   authActions,
   useIsLoggedIn,
@@ -34,10 +34,10 @@ export default function MyScreen() {
   const nickname = useNickname();
   const profileImage = useProfileImage();
 
+  useStatusBar("dark");
+
   useFocusEffect(
     useCallback(() => {
-      setStatusBarStyle("dark");
-
       // 모달 상태 초기화
       setShowStatusModal(false);
       setShowLogoutAlert(false);
