@@ -2,7 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import { ImagePickerResult } from "expo-image-picker";
 import { create } from "zustand/react";
 
-import useUserStore from "@/stores/useUserStore";
+import useAuthStore from "@/stores/useAuthStore";
 
 interface EditProfileStore {
   profileImageFromPicker: string;
@@ -40,8 +40,8 @@ const useEditProfileStore = create<EditProfileStore>((set) => ({
     },
 
     initializeFromUserStore: () => {
-      const userStore = useUserStore.getState();
-      const profileImage = userStore.profileImage || "";
+      const authStore = useAuthStore.getState();
+      const profileImage = authStore.profileImage || "";
 
       set({
         profileImageFromPicker: profileImage,

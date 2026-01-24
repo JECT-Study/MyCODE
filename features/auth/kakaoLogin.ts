@@ -5,8 +5,9 @@ import { router } from "expo-router";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
+import { authActions } from "@/stores/useAuthStore";
 import { logEvent } from "@/utils/analytics";
-import { handleLoginError, handleLoginSuccess } from "@/utils/authUtils";
+import { handleLoginError } from "@/utils/authUtils";
 
 const kakaoNativeAppKey = Constants.expoConfig?.extra?.kakaoNativeAppKey ?? "";
 
@@ -27,9 +28,10 @@ export const kakaoLogin = async () => {
     try {
       // 먼저 카카오톡 로그인 시도
       await login();
-    } catch (kakaoError: any) {
+    } catch (kakaoError: unknown) {
+      const error = kakaoError as { message?: string };
       // 카카오톡이 설치되어 있지만 로그인이 안 되어 있는 경우 웹뷰로 재시도
-      if (kakaoError.message?.includes("not connected to Kakao account")) {
+      if (error.message?.includes("not connected to Kakao account")) {
         console.log("카카오톡 로그인 실패, 웹뷰로 재시도");
         await login({
           useKakaoAccountLogin: true, // 웹뷰로 로그인
@@ -40,17 +42,17 @@ export const kakaoLogin = async () => {
     }
 
     const profile = await me();
-    const id = profile.id;
+    const { id } = profile;
 
     const response = await publicApi.post(LoginUrl, {
       socialId: id,
       socialType: "KAKAO",
     });
 
-    await handleLoginSuccess(response.data.result);
+    await authActions.login(response.data.result);
     logEvent("login_complete", { method: "kakao" });
     router.push("/(tabs)");
-  } catch (error: any) {
+  } catch (error: unknown) {
     handleLoginError(error);
   }
 };

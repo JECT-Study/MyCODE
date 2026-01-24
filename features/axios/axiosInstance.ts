@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
 import { RESPONSE_CODES } from "@/features/axios/responseCodes";
-import { handleLogout } from "@/utils/authUtils";
+import { authActions } from "@/stores/useAuthStore";
 
 const baseURL = Constants.expoConfig?.extra?.BACKEND_URL ?? "";
 
@@ -151,7 +151,7 @@ authApi.interceptors.response.use(
         ];
 
         if (authErrorCodes.includes(refreshErrorCode)) {
-          await handleLogout();
+          await authActions.logout();
           router.replace("/");
         }
 
@@ -169,7 +169,7 @@ authApi.interceptors.response.use(
     ];
 
     if (immediateLogoutCodes.includes(errorCode)) {
-      await handleLogout();
+      await authActions.logout();
       router.replace("/");
     }
 
@@ -180,7 +180,7 @@ authApi.interceptors.response.use(
     ];
 
     if (forbiddenErrorCodes.includes(errorCode)) {
-      await handleLogout();
+      await authActions.logout();
       router.replace("/");
     }
 

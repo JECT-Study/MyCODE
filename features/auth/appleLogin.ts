@@ -3,8 +3,9 @@ import { router } from "expo-router";
 
 import { LoginUrl } from "@/constants/ApiUrls";
 import { publicApi } from "@/features/axios/axiosInstance";
+import { authActions } from "@/stores/useAuthStore";
 import { logEvent } from "@/utils/analytics";
-import { handleLoginError, handleLoginSuccess } from "@/utils/authUtils";
+import { handleLoginError } from "@/utils/authUtils";
 
 export const IOSAppleLogin = async () => {
   try {
@@ -20,10 +21,10 @@ export const IOSAppleLogin = async () => {
       socialType: "APPLE",
     });
 
-    await handleLoginSuccess(response.data.result);
+    await authActions.login(response.data.result);
     logEvent("login_complete", { method: "apple" });
     router.push("/(tabs)");
-  } catch (error: any) {
+  } catch (error: unknown) {
     handleLoginError(error);
   }
 };
