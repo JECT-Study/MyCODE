@@ -16,7 +16,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AppleIcon from "@/components/icons/AppleIcon";
 import KakaoIcon from "@/components/icons/KakaoIcon";
-import MyCodeLogo from "@/components/icons/MyCodeLogo";
 import { loginImages, LoginImageType } from "@/constants/LoginImages";
 import { AndroidAppleLogin, IOSAppleLogin } from "@/features/auth/appleLogin";
 import { initializeKakao, kakaoLogin } from "@/features/auth/kakaoLogin";
@@ -171,10 +170,11 @@ export default function Login() {
       <LoginCardSlider />
       <View className="absolute inset-0 bg-black/80" />
       <View className="absolute top-1/3 z-10 flex -translate-y-1/2 items-center gap-y-2">
-        <MyCodeLogo width={180} height={44} />
-        <Text className="text-lg font-medium text-white">
-          내 코드에 딱 맞는 문화생활, 마이코드에서
-        </Text>
+        <Image
+          source={require("@/assets/images/mycode_logo.png")}
+          style={{ width: 270, height: 68 }}
+          contentFit="contain"
+        />
       </View>
 
       <View className="z-10 w-full">
@@ -191,7 +191,7 @@ export default function Login() {
           style={{ height: 60, width: "100%" }}
           pointerEvents="none"
         />
-        <View className="bg-[#555555] px-5">
+        <View className="bg-[#555555] px-[18px]">
           <View className="mb-6 w-full items-center">
             <KakaoLogin disabled={isLoggedIn} />
             <View className="my-2" />
@@ -199,10 +199,7 @@ export default function Login() {
           </View>
 
           <Pressable
-            onPress={() => {
-              logEvent("login_button_click", { button_id: "browse" });
-              router.push("/(tabs)");
-            }}
+            onPress={() => router.push("/(tabs)")}
             className="flex-row items-center justify-center px-6"
           >
             <View className="items-center">

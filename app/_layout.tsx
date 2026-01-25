@@ -268,5 +268,3 @@ export default function RootLayout() {
     </ErrorBoundary>
   );
 }
-
-// let AppEntryPoint = RootLayout;
