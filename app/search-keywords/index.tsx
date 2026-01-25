@@ -2,19 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
 import ClearIcon from "@/components/icons/ClearIcon";
 import CloseIcon from "@/components/icons/CloseIcon";
-import SearchIcon from "@/components/icons/SearchIcon";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { authApi } from "@/features/axios/axiosInstance";
 import { useStatusBar } from "@/hooks/useStatusBar";
@@ -27,6 +20,8 @@ export default function SearchKeywords() {
 
   // URL 파라미터에서 카테고리와 지역 값 받기
   const { category = "ALL", region = "" } = useLocalSearchParams();
+
+  const insets = useSafeAreaInsets();
 
   useStatusBar("dark");
 
@@ -131,27 +126,23 @@ export default function SearchKeywords() {
   };
 
   return (
-    <View className="flex-1 bg-white pt-[65px]">
+    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
       {/* 검색바 영역 */}
-      <View className="px-4 pb-4 pt-2">
+      <View className="px-[18px] pb-5 pt-3">
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()} className="mr-3">
             <BackArrow />
           </Pressable>
-          <View
-            className={`flex-1 flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 ${Platform.OS === "ios" ? "py-3" : ""}`}
-          >
-            <SearchIcon size={20} color="#6C4DFF" />
+          <View className="h-12 flex-1 flex-row items-center rounded-[18px] border border-[#6C4DFF] px-4">
             <TextInput
               ref={inputRef}
-              className="ml-3 flex-1 text-[15px] text-gray-700"
+              className="flex-1 text-[16px] text-black"
               placeholder="검색어를 입력해주세요."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#9E9E9E"
               value={searchWord}
               onChangeText={setSearchWord}
               onSubmitEditing={handleSearch}
               returnKeyType="search"
-              style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
             />
 
             {searchWord.trim() && (
@@ -169,7 +160,7 @@ export default function SearchKeywords() {
 
       {/* 최근 검색어 영역 */}
       {recentSearchWords.length > 0 ? (
-        <View className="px-4 py-4">
+        <View className="px-[18px] py-4">
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-xl font-medium text-gray-800">
               최근 검색어

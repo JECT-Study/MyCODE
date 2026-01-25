@@ -385,24 +385,20 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-[#816BFF]">
-      <View className="h-32 flex-row items-end justify-center bg-[#816BFF] px-[18px] pb-20">
-        <View className="w-full flex-row items-center gap-x-3">
-          <LogoIcon width={35} height={32} />
-          <Pressable
-            className="min-h-11 flex-1 flex-row items-center justify-between rounded-full bg-white px-[18px]"
-            onPress={handleSearchPress}
-          >
-            <Text className="text-[#6E6E6E]">
-              이번 주말, 뭐 할지 검색해 볼까?
-            </Text>
-            <SearchIcon size={24} color="#6B51FB" />
-          </Pressable>
-        </View>
+      <View className="flex-row items-center gap-x-3 px-[18px] pb-5 pt-3">
+        <LogoIcon width={35} height={32} />
+        <Pressable
+          className="h-12 flex-1 flex-row items-center justify-between rounded-full bg-white px-4"
+          onPress={handleSearchPress}
+        >
+          <Text className="text-[16px] text-[#9E9E9E]">
+            이번 주말, 뭐 할지 검색해 볼까?
+          </Text>
+          <SearchIcon size={24} color="#6B51FB" />
+        </Pressable>
       </View>
 
-      <View
-        className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
-      >
+      <View className={`flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}>
         <ScrollView
           ref={scrollViewRef}
           className={`bg-white ${!isScrolled ? "rounded-t-3xl" : ""}`}

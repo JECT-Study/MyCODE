@@ -5,19 +5,18 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Platform,
   Pressable,
   RefreshControl,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BackArrow from "@/components/icons/BackArrow";
 import Chevron from "@/components/icons/Chevron";
 import ClearIcon from "@/components/icons/ClearIcon";
 import FilterIcon from "@/components/icons/FilterIcon";
-import SearchIcon from "@/components/icons/SearchIcon";
 import FilterBottomSheet from "@/components/search/CategoryBottomSheet";
 import RegionBottomSheet from "@/components/search/RegionBottomSheet";
 import CommonModal from "@/components/ui/CommonModal";
@@ -101,6 +100,8 @@ export default function SearchResults() {
     category = "ALL",
     region = "",
   } = useLocalSearchParams();
+
+  const insets = useSafeAreaInsets();
 
   const [searchText, setSearchText] = useState<string>(keyword as string);
   const [lastValidSearchText, setLastValidSearchText] = useState<string>(
@@ -524,20 +525,18 @@ export default function SearchResults() {
   ]);
 
   return (
-    <View className="flex-1 bg-white pt-[65px]">
-      <View className="px-4 pb-4 pt-2">
+    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+      {/* 검색바 영역 */}
+      <View className="px-[18px] pb-5 pt-3">
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()} className="mr-3">
             <BackArrow />
           </Pressable>
-          <View
-            className={`flex-1 flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 ${Platform.OS === "ios" ? "py-3" : ""}`}
-          >
-            <SearchIcon size={20} color="#6C4DFF" />
+          <View className="h-12 flex-1 flex-row items-center rounded-[18px] border border-[#6C4DFF] px-4">
             <TextInput
-              className="ml-3 flex-1 text-[15px] text-gray-700"
+              className="flex-1 text-[16px] text-black"
               placeholder="검색어를 입력해주세요."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#9E9E9E"
               value={searchText}
               onChangeText={setSearchText}
               onSubmitEditing={() => {
@@ -549,8 +548,8 @@ export default function SearchResults() {
                 executeSearch(searchText, 1, false);
               }}
               returnKeyType="search"
-              style={Platform.OS === "android" ? { paddingVertical: 12 } : {}}
             />
+
             {searchText.trim() && (
               <Pressable
                 onPress={() => setSearchText("")}
@@ -565,7 +564,7 @@ export default function SearchResults() {
       </View>
 
       {/* 필터 영역 */}
-      <View className="flex-row items-center px-4 pb-4">
+      <View className="flex-row items-center px-[18px] pb-4">
         <View className="mr-4 flex-row items-center">
           <FilterIcon
             size={19}
@@ -658,12 +657,12 @@ export default function SearchResults() {
       <Divider />
 
       <FlatList
-        className="flex-1 pt-8"
+        className="pt-5"
         data={searchResults}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={{
-          paddingHorizontal: 16,
+          paddingHorizontal: 18,
           paddingBottom: 100,
           flexGrow: 1,
         }}

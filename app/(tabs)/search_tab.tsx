@@ -13,7 +13,6 @@ import {
 
 import Chevron from "@/components/icons/Chevron";
 import FilterIcon from "@/components/icons/FilterIcon";
-import SearchIcon from "@/components/icons/SearchIcon";
 import CategoryBottomSheet from "@/components/search/CategoryBottomSheet";
 import RegionBottomSheet from "@/components/search/RegionBottomSheet";
 import Divider from "@/components/ui/Divider";
@@ -402,30 +401,27 @@ export default function SearchScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="px-4 pb-4 pt-2">
-        <View className="flex-row items-center rounded-full border-[1.2px] border-[#6C4DFF] bg-white px-4 py-3">
-          <SearchIcon size={20} color="#6C4DFF" />
-          <Pressable
-            className="ml-3 flex-1"
-            onPress={() =>
-              router.push({
-                pathname: "/search-keywords",
-                params: {
-                  category: selectedCategory,
-                  region: selectedRegion.join(","),
-                },
-              })
-            }
-          >
-            <Text className="text-[16px] text-[#9CA3AF]">
-              이번 주말, 뭐할까?
-            </Text>
-          </Pressable>
-        </View>
+      <View className="px-[18px] pb-5 pt-3">
+        <Pressable
+          className="h-12 flex-row items-center rounded-[18px] border border-[#6C4DFF] px-4"
+          onPress={() =>
+            router.push({
+              pathname: "/search-keywords",
+              params: {
+                category: selectedCategory,
+                region: selectedRegion.join(","),
+              },
+            })
+          }
+        >
+          <Text className="text-[16px] text-[#9E9E9E]">
+            이번 주말, 뭐 할지 검색해 볼까?
+          </Text>
+        </Pressable>
       </View>
 
       {/* 필터 영역 */}
-      <View className="flex-row items-center px-4 pb-4">
+      <View className="flex-row items-center px-[18px] pb-4">
         <View className="mr-4 flex-row items-center">
           <FilterIcon
             size={19}
@@ -519,12 +515,12 @@ export default function SearchScreen() {
 
       <FlatList
         ref={flatListRef}
-        className="pt-8"
+        className="pt-5"
         data={isFilterSearchMode ? filterSearchResults : defaultSearchResults}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={{
-          paddingHorizontal: 16,
+          paddingHorizontal: 18,
           paddingBottom: 100,
           flexGrow: 1,
           justifyContent:
