@@ -1,11 +1,20 @@
-import analytics from "@react-native-firebase/analytics";
+import {
+  logEvent as firebaseLogEvent,
+  logLogin as firebaseLogLogin,
+  logScreenView as firebaseLogScreenView,
+  logSearch as firebaseLogSearch,
+  logSelectContent as firebaseLogSelectContent,
+  logShare as firebaseLogShare,
+  setUserId as firebaseSetUserId,
+  getAnalytics,
+} from "@react-native-firebase/analytics";
 
 /**
  * 화면 조회 이벤트 기록
  */
 export const logScreenView = async (screenName: string) => {
   try {
-    await analytics().logScreenView({
+    await firebaseLogScreenView(getAnalytics(), {
       screen_name: screenName,
       screen_class: screenName,
     });
@@ -19,10 +28,10 @@ export const logScreenView = async (screenName: string) => {
  */
 export const logEvent = async (
   eventName: string,
-  params?: Record<string, unknown>,
+  params?: Record<string, string | number>,
 ) => {
   try {
-    await analytics().logEvent(eventName, params);
+    await firebaseLogEvent(getAnalytics(), eventName, params);
   } catch (error) {
     console.error("Analytics event error:", error);
   }
@@ -33,7 +42,7 @@ export const logEvent = async (
  */
 export const setUserId = async (userId: string | null) => {
   try {
-    await analytics().setUserId(userId);
+    await firebaseSetUserId(getAnalytics(), userId);
   } catch (error) {
     console.error("Analytics user ID error:", error);
   }
@@ -44,7 +53,7 @@ export const setUserId = async (userId: string | null) => {
  */
 export const logLogin = async (method: "kakao" | "apple") => {
   try {
-    await analytics().logLogin({ method });
+    await firebaseLogLogin(getAnalytics(), { method });
   } catch (error) {
     console.error("Analytics login error:", error);
   }
@@ -55,7 +64,9 @@ export const logLogin = async (method: "kakao" | "apple") => {
  */
 export const logSearch = async (searchTerm: string) => {
   try {
-    await analytics().logSearch({ search_term: searchTerm });
+    await firebaseLogSearch(getAnalytics(), {
+      search_term: searchTerm,
+    });
   } catch (error) {
     console.error("Analytics search error:", error);
   }
@@ -66,7 +77,7 @@ export const logSearch = async (searchTerm: string) => {
  */
 export const logSelectContent = async (contentType: string, itemId: string) => {
   try {
-    await analytics().logSelectContent({
+    await firebaseLogSelectContent(getAnalytics(), {
       content_type: contentType,
       item_id: itemId,
     });
@@ -84,7 +95,7 @@ export const logShare = async (
   method: string,
 ) => {
   try {
-    await analytics().logShare({
+    await firebaseLogShare(getAnalytics(), {
       content_type: contentType,
       item_id: itemId,
       method,
