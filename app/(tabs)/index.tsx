@@ -32,6 +32,7 @@ import LockWithSparkles from "@/components/icons/LockWithSparkles";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { PerformanceIcon } from "@/components/icons/PerformanceIcon";
 import SearchIcon from "@/components/icons/SearchIcon";
+import LoginPromptModal from "@/components/ui/LoginPromptModal";
 import { BACKEND_URL } from "@/constants/ApiUrls";
 import { DIMENSIONS } from "@/constants/Dimensions";
 import { authApi, publicApi } from "@/features/axios/axiosInstance";
@@ -147,6 +148,9 @@ export default function HomeScreen() {
   const [weekDayError, setWeekDayError] = useState<boolean>(false);
   const [categoryContentError, setCategoryContentError] =
     useState<boolean>(false);
+
+  // 로그인 모달 상태
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
 
   const isLoggedIn = useIsLoggedIn();
   const nickname = useNickname();
@@ -552,16 +556,13 @@ export default function HomeScreen() {
                             이 공간은 잠시 비공개예요!
                           </Text>
                           <Text className="text-center text-lg text-gray-600">
-                            {!isLoggedIn
-                              ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
-                              : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
+                            내게 꼭 맞는 콘텐츠, 설문조사 후 확인하세요
                           </Text>
                         </View>
                         <Pressable
                           onPress={() => {
                             if (!isLoggedIn) {
-                              router.dismissAll();
-                              router.push("/");
+                              setShowLoginModal(true);
                             } else {
                               router.push("/survey");
                             }
@@ -583,9 +584,7 @@ export default function HomeScreen() {
                             }}
                           >
                             <Text className="text-base text-white">
-                              {!isLoggedIn
-                                ? "로그인하러 가기"
-                                : "취향 분석하러 가기"}
+                              설문조사 하러가기
                             </Text>
                             <ChevronRight
                               width={10}
@@ -775,6 +774,12 @@ export default function HomeScreen() {
           )}
         </ScrollView>
       </View>
+
+      <LoginPromptModal
+        visible={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        shouldDismissAll
+      />
     </View>
   );
 }

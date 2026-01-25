@@ -6,17 +6,22 @@ import { Modal, Pressable, Text } from "react-native";
 interface LoginPromptModalProps {
   visible: boolean;
   onClose: () => void;
+  shouldDismissAll?: boolean;
 }
 
 export default function LoginPromptModal({
   visible,
   onClose,
+  shouldDismissAll = false,
 }: LoginPromptModalProps) {
   const router = useRouter();
 
   const handleStartMaicord = () => {
-    router.push("/");
     onClose();
+    if (shouldDismissAll) {
+      router.dismissAll();
+    }
+    router.push("/");
   };
 
   return (
