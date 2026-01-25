@@ -10,6 +10,7 @@ import {
   Platform,
   Pressable,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,9 +27,13 @@ import { logEvent } from "@/utils/analytics";
 function LoginMarquee({
   imageList,
   direction,
+  cardWidth,
+  cardHeight,
 }: {
   imageList: LoginImageType;
   direction: "down" | "up";
+  cardWidth: number;
+  cardHeight: number;
 }) {
   const speed = direction === "down" ? -0.3 : 0.3;
   return (
@@ -39,7 +44,8 @@ function LoginMarquee({
         return (
           <View
             key={imageName}
-            className="my-2 flex h-[240px] w-[176px] items-center justify-center overflow-hidden rounded-[26px]"
+            style={{ width: cardWidth, height: cardHeight }}
+            className="my-2 flex items-center justify-center overflow-hidden rounded-[26px]"
           >
             <Image
               source={imageSrc}
@@ -54,14 +60,32 @@ function LoginMarquee({
 }
 
 function LoginCardSlider() {
+  const { width } = useWindowDimensions();
   const images = Object.entries(loginImages);
   const leftImages = images.splice(0, Math.floor(images.length / 2));
 
+  // 반응형 카드 크기 계산
+  const HORIZONTAL_PADDING = 20 * 2; // 좌우 패딩 합계
+  const COLUMN_GAP = 8;
+  const cardWidth = (width - HORIZONTAL_PADDING - COLUMN_GAP) / 2;
+  const ASPECT_RATIO = 240 / 176;
+  const cardHeight = cardWidth * ASPECT_RATIO;
+
   return (
-    <View className="flex flex-1 flex-row">
-      <LoginMarquee imageList={leftImages} direction={"up"} />
+    <View className="flex flex-1 flex-row px-[18px]">
+      <LoginMarquee
+        imageList={leftImages}
+        direction={"up"}
+        cardWidth={cardWidth}
+        cardHeight={cardHeight}
+      />
       <View className="m-2" />
-      <LoginMarquee imageList={images} direction={"down"} />
+      <LoginMarquee
+        imageList={images}
+        direction={"down"}
+        cardWidth={cardWidth}
+        cardHeight={cardHeight}
+      />
     </View>
   );
 }
