@@ -20,6 +20,7 @@ import {
 
 import SectionErrorState from "@/components/error/SectionErrorState";
 import Card from "@/components/home/Card";
+import HomeSkeleton from "@/components/home/HomeSkeleton";
 import HotCard from "@/components/home/HotCard";
 import MoreCard from "@/components/home/MoreCard";
 import WeeklyCard from "@/components/home/WeeklyCard";
@@ -129,6 +130,7 @@ export default function HomeScreen() {
   >([]);
 
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState<boolean>(false);
   const [isLoadingHotFestival, setIsLoadingHotFestival] =
@@ -289,11 +291,13 @@ export default function HomeScreen() {
   // 초기 API 호출
   useEffect(() => {
     Promise.all([
-      fetchRecommendationsByCategory("PERFORMANCE"),
-      fetchHotFestivalData(),
-      fetchWeeklyContentData(0),
-      fetchCategoryContentData(),
-    ]);
+      fetchRecommendationsByCategory("PERFORMANCE", true),
+      fetchHotFestivalData(true),
+      fetchWeeklyContentData(0, true),
+      fetchCategoryContentData(true),
+    ]).finally(() => {
+      setIsInitialLoading(false);
+    });
   }, [
     fetchRecommendationsByCategory,
     fetchHotFestivalData,
@@ -377,13 +381,6 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-[#816BFF]">
-      {/* 기본 헤더 - 고정 */}
-      {/* <LinearGradient
-        colors={["#816BFF", "#5E47E3"]}
-        start={{ x: 0, y: 0.14 }}
-        end={{ x: 1, y: 0.86 }}
-        locations={[0.0682, 0.9458]}
-      > */}
       <View className="h-32 flex-row items-end justify-center bg-[#816BFF] px-[18px] pb-20">
         <View className="w-full flex-row items-center gap-x-3">
           <LogoIcon width={35} height={32} />
@@ -398,7 +395,6 @@ export default function HomeScreen() {
           </Pressable>
         </View>
       </View>
-      {/* </LinearGradient> */}
 
       <View
         className={`mt-[-55px] flex-1 ${!isScrolled ? "rounded-t-3xl" : ""}`}
@@ -461,315 +457,322 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="gap-y-[34px]">
-            {/* 맞춤 콘텐츠 */}
-            <View className="relative py-2.5">
-              <Text className="mb-3 px-[18px] text-[19px] font-semibold text-[#424242]">
-                {isLoggedIn && nickname
-                  ? `${nickname}님을 위한 맞춤 콘텐츠`
-                  : "맞춤 콘텐츠"}
-              </Text>
+          {isInitialLoading ? (
+            <HomeSkeleton />
+          ) : (
+            <View className="gap-y-[34px]">
+              {/* 맞춤 콘텐츠 */}
+              <View className="relative py-2.5">
+                <Text className="mb-3 px-[18px] text-[19px] font-semibold text-[#424242]">
+                  {isLoggedIn && nickname
+                    ? `${nickname}님을 위한 맞춤 콘텐츠`
+                    : "맞춤 콘텐츠"}
+                </Text>
 
-              <View className="mb-5 flex-row gap-x-2.5 px-[18px]">
-                {categoryConfig.map((category) => {
-                  const isSelected =
-                    selectedRecommendationsCategory === category.id;
-                  const isDisabled = !isLoggedIn;
+                <View className="mb-5 flex-row gap-x-2.5 px-[18px]">
+                  {categoryConfig.map((category) => {
+                    const isSelected =
+                      selectedRecommendationsCategory === category.id;
+                    const isDisabled = !isLoggedIn;
 
-                  return (
-                    <Pressable
-                      key={category.id}
-                      disabled={isDisabled}
-                      className={`flex h-9 w-14 items-center justify-center rounded-full border border-[#6C4DFF] ${
-                        isSelected ? "bg-[#6C4DFF]" : "bg-white"
-                      }`}
-                      onPress={() => {
-                        if (!isDisabled) handleCategoryButtonPress(category.id);
-                      }}
-                    >
-                      <Text
-                        className={`text-base ${
-                          isSelected ? "text-white" : "text-[#6C4DFF]"
-                        }`}
-                      >
-                        {category.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              {isLoadingRecommendations ? (
-                <View className="h-[333px] w-full items-center justify-center">
-                  <ActivityIndicator size="large" color="#6C4DFF" />
-                </View>
-              ) : recommendationsError ? (
-                <View className="px-[18px]">
-                  <SectionErrorState
-                    title="맞춤 콘텐츠를 불러올 수 없습니다"
-                    onRetry={() =>
-                      fetchRecommendationsByCategory(
-                        selectedRecommendationsCategory,
-                      )
-                    }
-                    height={333}
-                  />
-                </View>
-              ) : (
-                <FlatList
-                  data={chunkedRecommendationsData}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
-                    paddingHorizontal: 18,
-                  }}
-                  renderItem={({ item }) => (
-                    <View className="w-[287px] flex-1 gap-y-[15.5px]">
-                      {item.map((cardItem) => (
-                        <Card
-                          key={cardItem.contentId.toString()}
-                          item={cardItem}
-                        />
-                      ))}
-                    </View>
-                  )}
-                  keyExtractor={(_, index) => index.toString()}
-                  ItemSeparatorComponent={() => <View className="w-3.5" />}
-                />
-              )}
-
-              {!recommendationsError &&
-                (!isLoggedIn || (isLoggedIn && userRegions.length === 0)) && (
-                  <BlurView
-                    intensity={8}
-                    className="absolute inset-0 flex items-center justify-center"
-                  >
-                    <View className="absolute inset-0 bg-white/95" />
-                    <View className="items-center gap-y-3">
-                      <LockWithSparkles width={144} height={117} />
-                      <View>
-                        <Text className="text-center text-xl font-semibold text-gray-800">
-                          이 공간은 잠시 비공개예요!
-                        </Text>
-                        <Text className="text-center text-lg text-gray-600">
-                          {!isLoggedIn
-                            ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
-                            : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
-                        </Text>
-                      </View>
+                    return (
                       <Pressable
+                        key={category.id}
+                        disabled={isDisabled}
+                        className={`flex h-9 w-14 items-center justify-center rounded-full border border-[#6C4DFF] ${
+                          isSelected ? "bg-[#6C4DFF]" : "bg-white"
+                        }`}
                         onPress={() => {
-                          if (!isLoggedIn) {
-                            router.dismissAll();
-                            router.push("/");
-                          } else {
-                            router.push("/survey");
-                          }
+                          if (!isDisabled)
+                            handleCategoryButtonPress(category.id);
                         }}
                       >
-                        <LinearGradient
-                          colors={["#7F69FE", "#6B52FB"]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          locations={[0.0073, 0.9927]}
-                          style={{
-                            borderRadius: 20,
-                            paddingHorizontal: 10,
-                            paddingVertical: 6,
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: 6,
+                        <Text
+                          className={`text-base ${
+                            isSelected ? "text-white" : "text-[#6C4DFF]"
+                          }`}
+                        >
+                          {category.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {isLoadingRecommendations ? (
+                  <View className="h-[333px] w-full items-center justify-center">
+                    <ActivityIndicator size="large" color="#6C4DFF" />
+                  </View>
+                ) : recommendationsError ? (
+                  <View className="px-[18px]">
+                    <SectionErrorState
+                      title="맞춤 콘텐츠를 불러올 수 없습니다"
+                      onRetry={() =>
+                        fetchRecommendationsByCategory(
+                          selectedRecommendationsCategory,
+                        )
+                      }
+                      height={333}
+                    />
+                  </View>
+                ) : (
+                  <FlatList
+                    data={chunkedRecommendationsData}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: 18,
+                    }}
+                    renderItem={({ item }) => (
+                      <View className="w-[287px] flex-1 gap-y-[15.5px]">
+                        {item.map((cardItem) => (
+                          <Card
+                            key={cardItem.contentId.toString()}
+                            item={cardItem}
+                          />
+                        ))}
+                      </View>
+                    )}
+                    keyExtractor={(_, index) => index.toString()}
+                    ItemSeparatorComponent={() => <View className="w-3.5" />}
+                  />
+                )}
+
+                {!recommendationsError &&
+                  (!isLoggedIn || (isLoggedIn && userRegions.length === 0)) && (
+                    <BlurView
+                      intensity={8}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <View className="absolute inset-0 bg-white/95" />
+                      <View className="items-center gap-y-3">
+                        <LockWithSparkles width={144} height={117} />
+                        <View>
+                          <Text className="text-center text-xl font-semibold text-gray-800">
+                            이 공간은 잠시 비공개예요!
+                          </Text>
+                          <Text className="text-center text-lg text-gray-600">
+                            {!isLoggedIn
+                              ? "내게 꼭 맞는 전시, 로그인하면 바로 보여드려요."
+                              : "내게 꼭 맞는 전시, 취향 분석하면 바로 보여드려요."}
+                          </Text>
+                        </View>
+                        <Pressable
+                          onPress={() => {
+                            if (!isLoggedIn) {
+                              router.dismissAll();
+                              router.push("/");
+                            } else {
+                              router.push("/survey");
+                            }
                           }}
                         >
-                          <Text className="text-base text-white">
-                            {!isLoggedIn
-                              ? "로그인하러 가기"
-                              : "취향 분석하러 가기"}
-                          </Text>
-                          <ChevronRight
-                            width={10}
-                            height={10}
-                            color="#FFFFFF"
-                          />
-                        </LinearGradient>
-                      </Pressable>
-                    </View>
-                  </BlurView>
-                )}
-            </View>
-
-            {/* 이번달 핫한 축제 */}
-            <View className="py-2.5">
-              <Text className="mb-5 px-[18px] text-[19px] font-semibold text-[#424242]">
-                이번달 핫한 축제 🔥
-              </Text>
-
-              {isLoadingHotFestival ? (
-                <View className="h-[154px] w-full items-center justify-center">
-                  <ActivityIndicator size="large" color="#6C4DFF" />
-                </View>
-              ) : hotFestivalError ? (
-                <View className="px-[18px]">
-                  <SectionErrorState
-                    title="축제 정보를 불러올 수 없습니다"
-                    onRetry={() => fetchHotFestivalData()}
-                    height={200}
-                  />
-                </View>
-              ) : (
-                <FlatList
-                  data={hotFestivalData}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
-                    paddingHorizontal: 18,
-                  }}
-                  renderItem={({ item }) => <HotCard item={item} />}
-                  keyExtractor={(item) => item.contentId.toString()}
-                  ItemSeparatorComponent={() => <View className="w-3.5" />}
-                />
-              )}
-            </View>
-
-            {/* 금주 콘텐츠 */}
-            <View className="flex py-2.5">
-              <Text className="mb-3 px-[18px] text-[19px] font-semibold text-black">
-                금주 콘텐츠를 한눈에 👀
-              </Text>
-
-              <View className="mb-5">
-                <FlatList
-                  data={weekDays}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
-                    paddingHorizontal: 18,
-                  }}
-                  renderItem={({ item }) => (
-                    <Pressable
-                      className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
-                        selectedWeekDayIndex === item.dayOfIndex
-                          ? "border-0 bg-[#6C4DFF]"
-                          : "border border-[#ECECEC] bg-white"
-                      }`}
-                      onPress={() => handleDateButtonPress(item.dayOfIndex)}
-                    >
-                      <Text
-                        className={`text-lg font-medium ${
-                          selectedWeekDayIndex === item.dayOfIndex
-                            ? "text-white"
-                            : "text-[#9E9E9E]"
-                        }`}
-                      >
-                        {item.date}
-                      </Text>
-                      <Text
-                        className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
-                      >
-                        {item.dayName}
-                      </Text>
-                    </Pressable>
+                          <LinearGradient
+                            colors={["#7F69FE", "#6B52FB"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            locations={[0.0073, 0.9927]}
+                            style={{
+                              borderRadius: 20,
+                              paddingHorizontal: 10,
+                              paddingVertical: 6,
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 6,
+                            }}
+                          >
+                            <Text className="text-base text-white">
+                              {!isLoggedIn
+                                ? "로그인하러 가기"
+                                : "취향 분석하러 가기"}
+                            </Text>
+                            <ChevronRight
+                              width={10}
+                              height={10}
+                              color="#FFFFFF"
+                            />
+                          </LinearGradient>
+                        </Pressable>
+                      </View>
+                    </BlurView>
                   )}
-                  keyExtractor={(item) => item.dayOfIndex.toString()}
-                  ItemSeparatorComponent={() => <View className="w-2" />}
-                />
               </View>
 
-              {isLoadingWeekDay ? (
-                <View className="h-[270px] w-full items-center justify-center">
-                  <ActivityIndicator size="large" color="#6C4DFF" />
-                </View>
-              ) : weekDayError ? (
-                <View className="px-[18px]">
-                  <SectionErrorState
-                    title="콘텐츠를 불러올 수 없습니다"
-                    onRetry={() => fetchWeeklyContentData(selectedWeekDayIndex)}
-                    height={270}
+              {/* 이번달 핫한 축제 */}
+              <View className="py-2.5">
+                <Text className="mb-5 px-[18px] text-[19px] font-semibold text-[#424242]">
+                  이번달 핫한 축제
+                </Text>
+
+                {isLoadingHotFestival ? (
+                  <View className="h-[154px] w-full items-center justify-center">
+                    <ActivityIndicator size="large" color="#6C4DFF" />
+                  </View>
+                ) : hotFestivalError ? (
+                  <View className="px-[18px]">
+                    <SectionErrorState
+                      title="축제 정보를 불러올 수 없습니다"
+                      onRetry={() => fetchHotFestivalData()}
+                      height={200}
+                    />
+                  </View>
+                ) : (
+                  <FlatList
+                    data={hotFestivalData}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: 18,
+                    }}
+                    renderItem={({ item }) => <HotCard item={item} />}
+                    keyExtractor={(item) => item.contentId.toString()}
+                    ItemSeparatorComponent={() => <View className="w-3.5" />}
+                  />
+                )}
+              </View>
+
+              {/* 금주 콘텐츠 */}
+              <View className="flex py-2.5">
+                <Text className="mb-3 px-[18px] text-[19px] font-semibold text-black">
+                  금주 콘텐츠를 한눈에
+                </Text>
+
+                <View className="mb-5">
+                  <FlatList
+                    data={weekDays}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: 18,
+                    }}
+                    renderItem={({ item }) => (
+                      <Pressable
+                        className={`flex h-[61px] w-[45px] items-center justify-center rounded-2xl ${
+                          selectedWeekDayIndex === item.dayOfIndex
+                            ? "border-0 bg-[#6C4DFF]"
+                            : "border border-[#ECECEC] bg-white"
+                        }`}
+                        onPress={() => handleDateButtonPress(item.dayOfIndex)}
+                      >
+                        <Text
+                          className={`text-lg font-medium ${
+                            selectedWeekDayIndex === item.dayOfIndex
+                              ? "text-white"
+                              : "text-[#9E9E9E]"
+                          }`}
+                        >
+                          {item.date}
+                        </Text>
+                        <Text
+                          className={`text-sm font-normal ${selectedWeekDayIndex === item.dayOfIndex ? "text-white" : "text-[#9E9E9E]"}`}
+                        >
+                          {item.dayName}
+                        </Text>
+                      </Pressable>
+                    )}
+                    keyExtractor={(item) => item.dayOfIndex.toString()}
+                    ItemSeparatorComponent={() => <View className="w-2" />}
                   />
                 </View>
-              ) : (
-                <FlatList
-                  data={chunkedFilteredContentData}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
-                    paddingHorizontal: 18,
-                  }}
-                  renderItem={({ item }) => (
-                    <View className="w-[285px] flex-1 gap-y-[15.5px]">
-                      {item.map((cardItem) => (
-                        <WeeklyCard
-                          key={cardItem.contentId.toString()}
-                          item={cardItem}
-                        />
-                      ))}
-                    </View>
-                  )}
-                  keyExtractor={(_, index) => index.toString()}
-                  ItemSeparatorComponent={() => <View className="w-3.5" />}
-                />
-              )}
 
-              <View className="mt-5 px-[18px]">
-                <Pressable
-                  className="mt-1 h-14 w-full items-center justify-center rounded-lg border border-[#6C4DFF] bg-white"
-                  onPress={handleSchedulePress}
-                >
-                  <View className="flex-row items-center gap-x-1.5">
-                    <Text className="text-lg font-medium text-[#6C4DFF]">
+                {isLoadingWeekDay ? (
+                  <View className="h-[270px] w-full items-center justify-center">
+                    <ActivityIndicator size="large" color="#6C4DFF" />
+                  </View>
+                ) : weekDayError ? (
+                  <View className="px-[18px]">
+                    <SectionErrorState
+                      title="콘텐츠를 불러올 수 없습니다"
+                      onRetry={() =>
+                        fetchWeeklyContentData(selectedWeekDayIndex)
+                      }
+                      height={270}
+                    />
+                  </View>
+                ) : (
+                  <FlatList
+                    data={chunkedFilteredContentData}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: 18,
+                    }}
+                    renderItem={({ item }) => (
+                      <View className="w-[285px] flex-1 gap-y-[15.5px]">
+                        {item.map((cardItem) => (
+                          <WeeklyCard
+                            key={cardItem.contentId.toString()}
+                            item={cardItem}
+                          />
+                        ))}
+                      </View>
+                    )}
+                    keyExtractor={(_, index) => index.toString()}
+                    ItemSeparatorComponent={() => <View className="w-3.5" />}
+                  />
+                )}
+
+                <View className="mt-5 px-[18px]">
+                  <Pressable
+                    className="mt-1 h-14 w-full items-center justify-center rounded-lg border border-[#6C4DFF] bg-white"
+                    onPress={handleSchedulePress}
+                  >
+                    <View className="flex-row items-center gap-x-1.5">
+                      <Text className="text-lg font-medium text-[#6C4DFF]">
+                        더보기
+                      </Text>
+                      <ChevronRight />
+                    </View>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* 이런 축제 어때요? */}
+              <View className="py-2.5 pb-6">
+                <View className="mb-5 flex-row items-center justify-between px-[18px]">
+                  <Text className="text-[19px] font-semibold text-[#424242]">
+                    이런 축제 어때요?
+                  </Text>
+                  <Pressable
+                    className="flex-row items-center gap-x-1.5"
+                    onPress={handleMoreButtonPress}
+                  >
+                    <Text className="text-base font-normal text-[#9E9E9E]">
                       더보기
                     </Text>
-                    <ChevronRight />
+                    <ChevronRight width={10} height={10} color="#9E9E9E" />
+                  </Pressable>
+                </View>
+
+                {isLoadingCategoryContent ? (
+                  <View className="h-[154px] w-full items-center justify-center">
+                    <ActivityIndicator size="large" color="#6C4DFF" />
                   </View>
-                </Pressable>
-              </View>
-            </View>
-
-            {/* 이런 축제 어때요? */}
-            <View className="py-2.5 pb-6">
-              <View className="mb-5 flex-row items-center justify-between px-[18px]">
-                <Text className="text-[19px] font-semibold text-[#424242]">
-                  이런 축제 어때요?
-                </Text>
-                <Pressable
-                  className="flex-row items-center gap-x-1.5"
-                  onPress={handleMoreButtonPress}
-                >
-                  <Text className="text-base font-normal text-[#9E9E9E]">
-                    더보기
-                  </Text>
-                  <ChevronRight width={10} height={10} color="#9E9E9E" />
-                </Pressable>
-              </View>
-
-              {isLoadingCategoryContent ? (
-                <View className="h-[154px] w-full items-center justify-center">
-                  <ActivityIndicator size="large" color="#6C4DFF" />
-                </View>
-              ) : categoryContentError ? (
-                <View className="px-[18px]">
-                  <SectionErrorState
-                    title="축제 정보를 불러올 수 없습니다"
-                    onRetry={() => fetchCategoryContentData()}
-                    height={200}
+                ) : categoryContentError ? (
+                  <View className="px-[18px]">
+                    <SectionErrorState
+                      title="축제 정보를 불러올 수 없습니다"
+                      onRetry={() => fetchCategoryContentData()}
+                      height={200}
+                    />
+                  </View>
+                ) : (
+                  <FlatList
+                    data={categoryContentData}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      paddingHorizontal: 18,
+                    }}
+                    renderItem={({ item }) => <MoreCard item={item} />}
+                    keyExtractor={(item) => item.contentId.toString()}
+                    ItemSeparatorComponent={() => <View className="w-3.5" />}
                   />
-                </View>
-              ) : (
-                <FlatList
-                  data={categoryContentData}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
-                    paddingHorizontal: 18,
-                  }}
-                  renderItem={({ item }) => <MoreCard item={item} />}
-                  keyExtractor={(item) => item.contentId.toString()}
-                  ItemSeparatorComponent={() => <View className="w-3.5" />}
-                />
-              )}
+                )}
+              </View>
             </View>
-          </View>
+          )}
         </ScrollView>
       </View>
     </View>

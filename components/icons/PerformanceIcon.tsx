@@ -36,7 +36,7 @@ export const PerformanceIcon: React.FC<PerformanceIconProps> = ({
       />
       <Path
         d="M47.2373 23L45.3239 24.9133L47.2373 26.8267L49.1506 24.9133L47.2373 23Z"
-        fill="#F4EC53"
+        fill="#FFE43D"
       />
       <Path
         d="M22.7363 38.7336L20.823 40.647L22.7363 42.5603L24.6497 40.647L22.7363 38.7336Z"

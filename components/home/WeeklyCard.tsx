@@ -27,10 +27,10 @@ function WeeklyCard({ item }: { item: WeeklyContentItem }) {
     <Pressable className="flex-row" onPress={handlePress}>
       <ContentImage
         imageUrl={item.image}
-        className="h-[90px] w-[120px]"
+        className="h-[92px] w-[92px]"
         rounded="rounded-lg"
       />
-      <View className="ml-3.5 flex-1">
+      <View className="ml-3.5 flex-1 justify-center">
         <Text
           className="mb-1 text-lg font-semibold leading-6 text-[#424242]"
           numberOfLines={2}

@@ -30,10 +30,10 @@ function Card({ item }: { item: CustomContentItem }) {
     <Pressable className="flex-row" onPress={handlePress}>
       <ContentImage
         imageUrl={item.image}
-        className="h-[111px] w-[111px]"
+        className="h-[90px] w-[120px]"
         rounded="rounded-[10px]"
       />
-      <View className="ml-3.5 flex-1">
+      <View className="ml-3.5 flex-1 justify-center">
         <Text
           className="mb-1 text-lg font-semibold leading-6 text-[#424242]"
           numberOfLines={2}

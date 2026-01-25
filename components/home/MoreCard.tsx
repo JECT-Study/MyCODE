@@ -23,8 +23,6 @@ function MoreCard({ item }: { item: CategoryContentItem }) {
     router.push(`/detail/${item.contentId}`);
   }, [router, item.contentId]);
 
-  console.log(item);
-
   return (
     <Pressable className="w-[154px]" onPress={handlePress}>
       <ContentImage
